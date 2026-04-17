@@ -1,730 +1,1193 @@
- <!DOCTYPE html>                                                                    
-  <html lang="en">                                                                   
-  <head>                                                                             
-    <meta charset="UTF-8" />                                                         
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />         
-    <title>J.A.R.V.I.S</title>                              
-    <style>                                                                          
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-                                                                                     
-      :root {                                               
-        --blue:      #00d4ff;
-        --blue-dim:  #0090b8;                                                        
-        --blue-dark: #003a4d;                                                        
-        --glow-soft: 0 0 8px #00d4ff66;                                              
-        --bg:        #010b12;                                                        
-        --panel:     #020f18cc;                                                      
-        --text:      #c8f0ff;                                                        
-        --text-dim:  #4a8ea0;                                                        
-      }                                                                              
-                                                                                     
-      html, body { height: 100%; background: var(--bg); font-family: 'Courier New',  
-  monospace; color: var(--text); overflow: hidden; }        
-                                                                                     
-      body::before {                                        
-        content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none;
-        background: repeating-linear-gradient(to bottom, transparent 0px, transparent
-   3px, rgba(0,212,255,0.02) 3px, rgba(0,212,255,0.02) 4px);                         
-      }
-                                                                                     
-      .shell { display: grid; grid-template-rows: 56px 1fr 60px;                     
-  grid-template-columns: 220px 1fr 220px; height: 100vh; }
-                                                                                     
-      /* Top bar */                                         
-      .topbar { grid-column: 1 / -1; display: flex; align-items: center;
-  justify-content: space-between; padding: 0 28px; border-bottom: 1px solid          
-  #00d4ff22; background: var(--panel); }
-      .topbar-logo { font-size: 13px; letter-spacing: 8px; font-weight: bold; color: 
-  var(--blue); text-shadow: var(--glow-soft); }                                      
-      .topbar-right { font-size: 11px; color: var(--text-dim); letter-spacing: 3px; }
-      #clock { color: var(--blue); text-shadow: var(--glow-soft); }                  
-                                                                                     
-      .waveform { display: flex; align-items: center; gap: 3px; height: 24px; }      
-      .waveform .w { width: 3px; border-radius: 2px; background: var(--blue);        
-  animation: waveani 1.4s ease-in-out infinite; }                                    
-      .waveform .w:nth-child(1){animation-delay:0.0s} .waveform
-  .w:nth-child(2){animation-delay:0.1s}                                              
-      .waveform .w:nth-child(3){animation-delay:0.2s} .waveform
-  .w:nth-child(4){animation-delay:0.3s}                                              
-      .waveform .w:nth-child(5){animation-delay:0.4s} .waveform
-  .w:nth-child(6){animation-delay:0.5s}                                              
-      .waveform .w:nth-child(7){animation-delay:0.6s} .waveform
-  .w:nth-child(8){animation-delay:0.7s}                                              
-      .waveform .w:nth-child(9){animation-delay:0.8s} .waveform
-  .w:nth-child(10){animation-delay:0.9s}                                             
-      @keyframes waveani { 0%,100%{height:4px;opacity:0.3}  
-  50%{height:20px;opacity:1;box-shadow:0 0 4px var(--blue)} }                        
-      .waveform.idle .w { animation-play-state: paused; height: 4px; opacity: 0.2; }
-                                                                                     
-      /* Sidebars */                                        
-      .sidebar { padding: 24px 16px; border-right: 1px solid #00d4ff18; background:  
-  var(--panel); display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
-      .sidebar.right { border-right: none; border-left: 1px solid #00d4ff18; }
-      .panel-block { border: 1px solid #00d4ff22; background: #020d17; padding: 12px 
-  14px; border-radius: 4px; }                                                        
-      .panel-title { font-size: 9px; letter-spacing: 4px; color: var(--text-dim);
-  margin-bottom: 10px; text-transform: uppercase; }                                  
-      .panel-value { font-size: 12px; color: var(--blue); line-height: 1.8; }
-      .status-row { display: flex; align-items: center; gap: 10px; font-size: 11px;  
-  letter-spacing: 2px; }                                    
-      .status-dot { width: 8px; height: 8px; border-radius: 50%; background:         
-  var(--blue); box-shadow: 0 0 6px var(--blue); flex-shrink: 0; transition:          
-  background 0.3s; }
-      .status-dot.warn  { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }        
-      .status-dot.error { background: #ff4444; box-shadow: 0 0 6px #ff4444; }        
-      .status-dot.pulse { animation: dotpulse 1s ease-in-out infinite; }
-      @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1)}                    
-  50%{opacity:0.4;transform:scale(0.6)} }                                            
-                                                                                     
-      .bars { display: flex; align-items: flex-end; gap: 3px; height: 40px;          
-  margin-top: 8px; }                                        
-      .bar { flex: 1; background: var(--blue-dark); border-radius: 2px 2px 0 0;      
-  animation: barwave 2.4s ease-in-out infinite; }                                    
-      .bar:nth-child(1){animation-delay:0.0s} .bar:nth-child(2){animation-delay:0.2s}
-   .bar:nth-child(3){animation-delay:0.4s}                                           
-      .bar:nth-child(4){animation-delay:0.6s} .bar:nth-child(5){animation-delay:0.8s}
-   .bar:nth-child(6){animation-delay:1.0s} .bar:nth-child(7){animation-delay:1.2s}   
-      @keyframes barwave { 0%,100%{height:6px;background:var(--blue-dark)}
-  50%{height:34px;background:var(--blue);box-shadow:0 0 6px var(--blue)} }           
-                                                            
-      /* Center */                                                                   
-      .center { display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 28px; position: relative; overflow: hidden; }        
-      .center::before { content: ''; position: absolute; inset: 0; background:
-  linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px), linear-gradient(90deg,
-   rgba(0,212,255,0.025) 1px, transparent 1px); background-size: 40px 40px; }
-                                                                                     
-      /* Arc Reactor */                                     
-      .reactor-wrap { position: relative; width: 240px; height: 240px; display: flex;
-   align-items: center; justify-content: center; z-index: 2; }                       
-      .ring-outer { position: absolute; inset: 0; border-radius: 50%; border: 2px
-  solid transparent; border-top-color: var(--blue); border-right-color: var(--blue); 
-  animation: spin 6s linear infinite; box-shadow: 0 0 10px #00d4ff55; }
-      .ring-mid   { position: absolute; inset: 12px; border-radius: 50%; border: 1px 
-  solid #00d4ff33; border-bottom-color: var(--blue); animation: spin 4s linear       
-  infinite reverse; }
-      .ring-inner { position: absolute; inset: 30px; border-radius: 50%; border: 2px 
-  dashed #00d4ff22; animation: spin 10s linear infinite; }                           
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .reactor-core { width: 140px; height: 140px; border-radius: 50%; background:   
-  radial-gradient(circle at 40% 35%, #b0f0ff 0%, #40cfff 20%, #00a8d6 40%, #003d5c   
-  70%, #001a2e 100%); box-shadow: 0 0 30px #00d4ffcc, 0 0 70px #00d4ff88, 0 0 120px  
-  #00d4ff44, inset 0 0 30px #005580; position: relative; animation: corepulse 3s     
-  ease-in-out infinite; cursor: pointer; }                  
-      .reactor-core::after { content: ''; position: absolute; inset: 18px;
-  border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); box-shadow: inset 0 0
-   20px rgba(0,180,220,0.4); }
-      @keyframes corepulse {                                                         
-        0%,100% { box-shadow: 0 0 30px #00d4ffcc, 0 0 70px #00d4ff88, 0 0 120px
-  #00d4ff44, inset 0 0 30px #005580; }                                               
-        50%      { box-shadow: 0 0 50px #00d4ffee, 0 0 110px #00d4ffaa, 0 0 180px
-  #00d4ff66, inset 0 0 50px #0088cc; }                                               
-      }                                                     
-      .reactor-segments { position: absolute; inset: 40px; border-radius: 50%;       
-  background: conic-gradient(#00d4ff22 0deg, transparent 20deg, transparent 60deg,   
-  #00d4ff22 60deg, transparent 80deg, transparent 120deg, #00d4ff22 120deg,
-  transparent 140deg, transparent 180deg, #00d4ff22 180deg, transparent 200deg,      
-  transparent 240deg, #00d4ff22 240deg, transparent 260deg, transparent 300deg,
-  #00d4ff22 300deg, transparent 320deg, transparent 360deg); animation: spin 20s
-  linear infinite reverse; }
-      .reactor-glow { position: absolute; inset: -40px; border-radius: 50%;
-  background: radial-gradient(circle, #00d4ff1a 0%, transparent 70%); pointer-events:
-   none; animation: corepulse 3s ease-in-out infinite; }
-                                                                                     
-      .mic-hint { font-size: 9px; letter-spacing: 3px; color: var(--text-dim);       
-  margin-top: -16px; z-index: 2; }
-      .status-label { z-index: 2; text-align: center; }                              
-      .badge { display: inline-block; font-size: 11px; letter-spacing: 4px; padding: 
-  6px 20px; border: 1px solid var(--blue); color: var(--blue); text-shadow:          
-  var(--glow-soft); box-shadow: var(--glow-soft); text-transform: uppercase;         
-  transition: all 0.4s ease; background: #00d4ff08; }                                
-      .command-feed { z-index: 2; text-align: center; max-width: 500px; padding: 0
-  16px; }                                                                            
-      .feed-label { font-size: 9px; letter-spacing: 4px; color: var(--text-dim);
-  margin-bottom: 8px; }                                                              
-      #last-command { font-size: 15px; color: var(--text); letter-spacing: 2px;
-  min-height: 22px; transition: all 0.3s; text-shadow: 0 0 8px rgba(0,212,255,0.4); }
-      #last-action { font-size: 11px; color: var(--blue-dim); letter-spacing: 1px;
-  margin-top: 6px; min-height: 18px; }                                               
-                                                            
-      /* Bottom bar */                                                               
-      .bottombar { grid-column: 1 / -1; display: flex; align-items: center;
-  justify-content: space-between; padding: 0 28px; border-top: 1px solid #00d4ff22;  
-  background: var(--panel); }
-      .bottom-item { font-size: 10px; letter-spacing: 3px; color: var(--text-dim); } 
-      .bottom-item span { color: var(--blue); }             
-                                                                                     
-      /* Log */
-      #log { font-size: 10px; line-height: 2; max-height: 180px; overflow-y: auto;   
-  color: var(--text-dim); }                                                          
-      #log::-webkit-scrollbar { width: 4px; }
-      #log::-webkit-scrollbar-thumb { background: var(--blue-dark); border-radius:   
-  2px; }                                                                             
-                                                                                     
-      /* Popup-blocked open button */                                                
-      #open-btn-wrap {                                      
-        display: none; position: fixed; bottom: 80px; left: 50%; transform:          
-  translateX(-50%);                                                                  
-        z-index: 1000; animation: flashin 0.3s ease;                                 
-      }                                                                              
-      #open-btn {                                           
-        display: block; padding: 14px 36px;                                          
-        background: #00d4ff12; border: 1px solid var(--blue);
-        color: var(--blue); font-family: 'Courier New', monospace;                   
-        font-size: 12px; letter-spacing: 4px; cursor: pointer;
-        box-shadow: 0 0 20px #00d4ff44; text-decoration: none;                       
-        text-transform: uppercase; transition: background 0.2s;                      
-      }                                                                              
-      #open-btn:hover { background: #00d4ff22; }                                     
-                                                            
-      /* Browser warning */                                                          
-      #browser-warn { display: none; position: fixed; top: 70px; left: 50%;
-  transform: translateX(-50%); background: #1a0a00; border: 1px solid #ff6600; color:
-   #ff9944; font-size: 11px; letter-spacing: 2px; padding: 8px 20px; border-radius:
-  2px; z-index: 1000; }                                                              
-                                                            
-      @keyframes flashin { from{opacity:0;transform:translateX(-50%) translateY(8px)}
-   to{opacity:1;transform:translateX(-50%) translateY(0)} }
-      .flash { animation: flashin2 0.3s ease forwards; }                             
-      @keyframes flashin2 { from{opacity:0;transform:translateY(5px)}                
-  to{opacity:1;transform:translateY(0)} }                                            
-    </style>                                                                         
-  </head>                                                                            
-  <body>                                                    
-
-  <div id="browser-warn">⚠ USE CHROME OR EDGE — SAFARI / FIREFOX DON'T SUPPORT WEB   
-  SPEECH API</div>
-                                                                                     
-  <!-- Popup-blocked fallback button -->                    
-  <div id="open-btn-wrap">
-    <a id="open-btn" href="#" target="_blank" rel="noopener">TAP TO OPEN</a>         
-  </div>                                                                             
-                                                                                     
-  <div class="shell">                                                                
-    <header class="topbar">                                 
-      <div class="topbar-logo">J.A.R.V.I.S</div>
-      <div class="waveform idle" id="waveform">
-        <div class="w"></div><div class="w"></div><div class="w"></div><div          
-  class="w"></div><div class="w"></div>                                              
-        <div class="w"></div><div class="w"></div><div class="w"></div><div          
-  class="w"></div><div class="w"></div>                                              
-      </div>                                                
-      <div class="topbar-right"><span id="clock">00:00:00</span> &nbsp;|&nbsp;
-  ONLINE</div>                                                                       
-    </header>
-                                                                                     
-    <aside class="sidebar">                                 
-      <div class="panel-block">
-        <div class="panel-title">System Status</div>
-        <div class="status-row">                                                     
-          <div class="status-dot" id="status-dot"></div>
-          <div class="panel-value" id="status-text">IDLE</div>                       
-        </div>                                                                       
-      </div>
-      <div class="panel-block">                                                      
-        <div class="panel-title">Audio Input</div>          
-        <div class="bars">                                                           
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div  
-  class="bar"></div>                                        
-        </div>                                                                       
-      </div>                                                
-      <div class="panel-block">
-        <div class="panel-title">Wake Phrase</div>
-        <div class="panel-value">"JARVIS"</div>                                      
-      </div>
-      <div class="panel-block">                                                      
-        <div class="panel-title">Mode</div>                 
-        <div class="panel-value" id="mode-text"                                      
-  style="color:var(--text-dim)">STANDBY</div>                                        
-      </div>                                                                         
-    </aside>                                                                         
-                                                            
-    <main class="center">
-      <div class="reactor-wrap" id="reactor" title="Click to activate / deactivate">
-        <div class="reactor-glow"></div>                                             
-        <div class="ring-outer"></div>
-        <div class="ring-mid"></div>                                                 
-        <div class="ring-inner"></div>                      
-        <div class="reactor-segments"></div>                                         
-        <div class="reactor-core"></div>                    
-      </div>
-                                                                                     
-      <div class="mic-hint" id="mic-hint">CLICK REACTOR TO ACTIVATE</div>
-                                                                                     
-      <div class="status-label">                                                     
-        <div class="badge" id="status-badge">IDLE</div>
-      </div>                                                                         
-                                                            
-      <div class="command-feed">
-        <div class="feed-label">LAST COMMAND</div>
-        <div id="last-command">—</div>                                               
-        <div id="last-action">Click the reactor to begin.</div>
-      </div>                                                                         
-    </main>                                                 
-                                                                                     
-    <aside class="sidebar right">                           
-      <div class="panel-block">
-        <div class="panel-title">Command Log</div>
-        <div id="log">—</div>                                                        
-      </div>
-      <div class="panel-block">                                                      
-        <div class="panel-title">Quick Reference</div>      
-        <div class="panel-value"                                                     
-  style="font-size:10px;line-height:2;color:var(--text-dim);">                       
-          open youtube<br>open gmail<br>open chatgpt<br>open netflix<br>             
-          open github<br>open [any site]<br>what time is it<br>quit jarvis           
-        </div>                                                                       
-      </div>                                                                         
-    </aside>                                                                         
-                                                            
-    <footer class="bottombar">
-      <div class="bottom-item">STARK INDUSTRIES &nbsp; v1.0</div>
-      <div class="bottom-item">CORE POWER &nbsp;<span>ARC REACTOR</span></div>       
-      <div class="bottom-item">SYSTEM &nbsp;<span>NOMINAL</span></div>               
-    </footer>                                                                        
-  </div>                                                                             
-                                                                                     
-  <script>                                                  
-  // ─────────────────────────────────────────────
-  //  CONFIG — add any site here                                                     
-  // ─────────────────────────────────────────────
-  const WAKE_PHRASE = "jarvis";                                                      
-                                                            
-  const WEBSITES = {                                                                 
-    "youtube":        "https://youtube.com",                
-    "gmail":          "https://mail.google.com",                                     
-    "google":         "https://google.com",
-    "chatgpt":        "https://chat.openai.com",                                     
-    "chat gpt":       "https://chat.openai.com",            
-    "netflix":        "https://netflix.com",                                         
-    "spotify":        "https://open.spotify.com",           
-    "spotify web":    "https://open.spotify.com",                                    
-    "github":         "https://github.com",
-    "twitter":        "https://twitter.com",                                         
-    "x":              "https://twitter.com",                                         
-    "reddit":         "https://reddit.com",
-    "linkedin":       "https://linkedin.com",                                        
-    "amazon":         "https://amazon.com",                 
-    "instagram":      "https://instagram.com",                                       
-    "facebook":       "https://facebook.com",
-    "whatsapp":       "https://web.whatsapp.com",                                    
-    "notion":         "https://notion.so",                                           
-    "figma":          "https://figma.com",
-    "claude":         "https://claude.ai",                                           
-    "vercel":         "https://vercel.com",                 
-    "news":           "https://news.ycombinator.com",                                
-    "hacker news":    "https://news.ycombinator.com",
-    "wikipedia":      "https://wikipedia.org",                                       
-    "maps":           "https://maps.google.com",                                     
-    "google maps":    "https://maps.google.com",
-    "drive":          "https://drive.google.com",                                    
-    "google drive":   "https://drive.google.com",           
-    "calendar":       "https://calendar.google.com",                                 
-    "google calendar":"https://calendar.google.com",
-    "docs":           "https://docs.google.com",                                     
-    "google docs":    "https://docs.google.com",                                     
-    "sheets":         "https://sheets.google.com",
-    "slides":         "https://slides.google.com",                                   
-    "meet":           "https://meet.google.com",            
-    "zoom":           "https://zoom.us",                                             
-    "twitch":         "https://twitch.tv",
-    "discord":        "https://discord.com/app",                                     
-    "slack":          "https://app.slack.com",              
-    "pinterest":      "https://pinterest.com",                                       
-    "tiktok":         "https://tiktok.com",
-    "stackoverflow":  "https://stackoverflow.com",                                   
-    "stack overflow": "https://stackoverflow.com",                                   
-    "medium":         "https://medium.com",
-    "paypal":         "https://paypal.com",                                          
-    "stripe":         "https://stripe.com",                 
-  };                                                                                 
-   
-  // Known desktop apps — friendly message since browser can't launch them           
-  const DESKTOP_APPS = ["terminal","finder","safari","chrome","vscode","vs 
-  code","xcode","calculator","notes","messages","mail","music","photos","keynote","pa
-  ges","numbers","activity monitor"];                       
-                                                                                     
-  // ─────────────────────────────────────────────          
-  //  DOM
-  // ─────────────────────────────────────────────
-  const statusDot   = document.getElementById("status-dot");
-  const statusText  = document.getElementById("status-text");                        
-  const statusBadge = document.getElementById("status-badge");
-  const modeText    = document.getElementById("mode-text");                          
-  const waveform    = document.getElementById("waveform");  
-  const lastCmd     = document.getElementById("last-command");                       
-  const lastAction  = document.getElementById("last-action");
-  const logEl       = document.getElementById("log");                                
-  const micHint     = document.getElementById("mic-hint");
-  const reactor     = document.getElementById("reactor");                            
-  const openBtnWrap = document.getElementById("open-btn-wrap");
-  const openBtn     = document.getElementById("open-btn");                           
-   
-  // ─────────────────────────────────────────────                                   
-  //  State                                                 
-  // ─────────────────────────────────────────────
-  let recognition  = null;                                                           
-  let listening    = false;
-  let awaitingCmd  = false;                                                          
-  let isSpeaking   = false;                                 
-  const synth      = window.speechSynthesis;                                         
-   
-  // ─────────────────────────────────────────────                                   
-  //  Clock                                                 
-  // ─────────────────────────────────────────────                                   
-  function tick() {                                         
-    document.getElementById("clock").textContent =
-      new Date().toLocaleTimeString("en-US", { hour12: false });
-  }                                                                                  
-  setInterval(tick, 1000);
-  tick();                                                                            
-                                                            
-  // ─────────────────────────────────────────────
-  //  Status helpers
-  // ─────────────────────────────────────────────                                   
-  const STATUS_MAP = {
-    idle:  { label:"IDLE",          badge:"IDLE",       dot:"",      mode:"STANDBY"  
-   },                                                                                
-    wake:  { label:"LISTENING",     badge:"LISTENING",  dot:"pulse", mode:"WAKE WORD"
-   },                                                                                
-    cmd:   { label:"AWAITING CMD",  badge:"CAPTURING",  dot:"pulse", mode:"COMMAND"
-   },                                                                                
-    exec:  { label:"EXECUTING",     badge:"EXECUTING",  dot:"warn",  mode:"EXECUTE"
-   },                                                                                
-    speak: { label:"SPEAKING",      badge:"SPEAKING",   dot:"pulse", mode:"OUTPUT"
-   },                                                                                
-    error: { label:"ERROR",         badge:"ERROR",      dot:"error", mode:"ERROR"
-   },                                                                                
-  };                                                        
-
-  function setStatus(key) {                                                          
-    const s = STATUS_MAP[key] || STATUS_MAP.idle;
-    statusDot.className = "status-dot " + s.dot;                                     
-    statusText.textContent = s.label;                       
-    statusBadge.textContent = s.badge;                                               
-    modeText.textContent = s.mode;
-    waveform.classList.toggle("idle", key !== "wake" && key !== "cmd");              
-  }                                                                                  
-   
-  function logEntry(text, isError = false) {                                         
-    if (logEl.textContent === "—") logEl.textContent = "";  
-    const line = document.createElement("div");                                      
-    line.textContent = "> " + text;                         
-    line.style.color = isError ? "#ff5555" : "var(--blue)";                          
-    line.classList.add("flash");                                                     
-    logEl.appendChild(line);                                                         
-    logEl.scrollTop = logEl.scrollHeight;                                            
-    while (logEl.children.length > 25) logEl.removeChild(logEl.firstChild);          
-  }                                                                                  
-   
-  function setTranscript(text) {                                                     
-    lastCmd.textContent = text;                             
-    lastCmd.classList.remove("flash");
-    void lastCmd.offsetWidth;                                                        
-    lastCmd.classList.add("flash");
-  }                                                                                  
-                                                                                     
-  function setAction(text, isError = false) {
-    lastAction.textContent = text;                                                   
-    logEntry(text, isError);                                
-  }
-
-  // ─────────────────────────────────────────────                                   
-  //  TTS — pauses mic while speaking to prevent self-hearing
-  // ─────────────────────────────────────────────                                   
-  function speak(text, onDone) {                            
-    if (!synth) { onDone && onDone(); return; }                                      
-    synth.cancel();                                                                  
-    isSpeaking = true;
-    setStatus("speak");                                                              
-                                                                                     
-    // Pause mic so Jarvis doesn't hear itself
-    if (recognition && listening) {                                                  
-      try { recognition.stop(); } catch(_) {}               
-    }                                                                                
-   
-    const utt = new SpeechSynthesisUtterance(text);                                  
-    utt.rate  = 1.0;                                        
-    utt.pitch = 0.85;                                                                
-    utt.volume = 1.0;
-                                                                                     
-    // Pick a good voice if available                                                
-    const voices = synth.getVoices();
-    const preferred = voices.find(v =>                                               
-      v.name.includes("Google UK English Male") ||                                   
-      v.name.includes("Daniel") ||
-      v.name.includes("Alex") ||                                                     
-      v.name.includes("Google US English")                  
-    );                                                                               
-    if (preferred) utt.voice = preferred;                   
-
-    utt.onend = () => {                                                              
-      isSpeaking = false;
-      // Resume mic                                                                  
-      if (listening) {                                      
-        setTimeout(() => {
-          try { recognition.start(); } catch(_) {}
-        }, 350);
-      }                                                                              
-      onDone && onDone();
-    };                                                                               
-                                                            
-    utt.onerror = () => {
-      isSpeaking = false;
-      if (listening) setTimeout(() => { try { recognition.start(); } catch(_) {} },
-  350);                                                                              
-      onDone && onDone();
-    };                                                                               
-                                                            
-    synth.speak(utt);
-  }
-
-  // Voices load async in some browsers                                              
-  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
-                                                                                     
-  // ─────────────────────────────────────────────          
-  //  URL resolver — handles ANY website                                             
-  // ─────────────────────────────────────────────          
-  function resolveURL(target) {                                                      
-    const t = target.toLowerCase().trim();
-                                                                                     
-    // 1. Exact match in config                                                      
-    if (WEBSITES[t]) return WEBSITES[t];
-                                                                                     
-    // 2. Partial match (e.g. "youtube videos" → youtube.com)                        
-    for (const [k, v] of Object.entries(WEBSITES)) {
-      if (t.includes(k) || k.includes(t)) return v;                                  
-    }                                                       
-
-    // 3. Looks like a domain (e.g. "espn.com", "bbc.co.uk")                         
-    if (/^[\w-]+\.[a-z]{2,}/.test(t) && !t.includes(" ")) {
-      return t.startsWith("http") ? t : "https://" + t;                              
-    }                                                                                
-                                                                                     
-    // 4. Single word — try adding .com (e.g. "espn" → espn.com)                     
-    if (!t.includes(" ") && t.length > 2) {                 
-      return "https://" + t + ".com";                                                
-    }                                                       
-                                                                                     
-    // 5. Multi-word fallback — Google search               
-    return "https://www.google.com/search?q=" + encodeURIComponent(t);
-  }                                                                                  
-   
-  function isDesktopApp(target) {                                                    
-    const t = target.toLowerCase();                         
-    return DESKTOP_APPS.some(a => t.includes(a) || a.includes(t));                   
-  }                                                         
-
-  // ─────────────────────────────────────────────                                   
-  //  Open URL with popup-blocker fallback
-  // ─────────────────────────────────────────────                                   
-  let openBtnTimer = null;                                                           
-   
-  function openURL(url, label) {                                                     
-    const win = window.open(url, "_blank", "noopener");     
-    if (!win || win.closed || typeof win.closed === "undefined") {                   
-      // Popup blocked — show fallback button                                        
-      openBtn.textContent = "TAP TO OPEN " + label.toUpperCase();                    
-      openBtn.href = url;                                                            
-      openBtnWrap.style.display = "block";                                           
-      clearTimeout(openBtnTimer);                           
-      openBtnTimer = setTimeout(() => { openBtnWrap.style.display = "none"; },       
-  12000);                                                                            
-    }
-  }                                                                                  
-                                                            
-  openBtn.addEventListener("click", () => {
-    openBtnWrap.style.display = "none";
-  });                                                                                
-   
-  // ─────────────────────────────────────────────                                   
-  //  Command handler                                       
-  // ─────────────────────────────────────────────
-  function handleCommand(cmd) {                                                      
-    const c = cmd.toLowerCase().trim();
-    setTranscript(cmd);                                                              
-    setStatus("exec");                                                               
-   
-    // Quit                                                                          
-    if (/\b(quit|exit|goodbye|bye|shut down|shutdown|stop jarvis)\b/.test(c)) {
-      speak("Goodbye, master. Going offline.", () => {                               
-        stopListening();                                                             
-        setAction("Jarvis offline.");                                                
-        micHint.textContent = "CLICK REACTOR TO ACTIVATE";                           
-      });                                                   
-      return;                                                                        
-    }                                                       
-
-    // Time
-    if (/\btime\b/.test(c) && !/\bdate\b/.test(c)) {
-      const t = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute:    
-  "2-digit" });                                                                      
-      const msg = "Yes master. The current time is " + t + ".";                      
-      setAction(msg);                                                                
-      speak(msg, () => setStatus("wake"));                  
-      return;                                                                        
-    }                                                       
-                                                                                     
-    // Date                                                 
-    if (/\b(date|today|day is it|what day)\b/.test(c)) {
-      const d = new Date().toLocaleDateString("en-US", { weekday:"long",             
-  year:"numeric", month:"long", day:"numeric" });                                    
-      const msg = "Yes master. Today is " + d + ".";                                 
-      setAction(msg);                                                                
-      speak(msg, () => setStatus("wake"));                  
-      return;
-    }                                                                                
-   
-    // Open / navigate                                                               
-    const openMatch = c.match(/^(?:open|go to|navigate to|launch|show me|take me 
-  to|load)\s+(.+)$/);                                                                
-    if (openMatch) {
-      const target = openMatch[1].trim();                                            
-                                                            
-      // Desktop app                                                                 
-      if (isDesktopApp(target)) {                           
-        const msg = "I cannot open desktop apps from the browser, master. Try the 
-  local Python version for that.";                                                   
-        setAction(msg, true);
-        speak(msg, () => setStatus("wake"));                                         
-        return;                                                                      
-      }
-                                                                                     
-      // Website — resolves anything                        
-      const url = resolveURL(target);
-      const displayName = target.charAt(0).toUpperCase() + target.slice(1);
-      const msg = "Yes master. Opening " + displayName + ".";                        
-      setAction(msg);
-      speak(msg, () => {                                                             
-        openURL(url, displayName);                          
-        setStatus("wake");                                                           
-      });                                                   
-      return;
-    }
-
-    // Search fallback — "search for X" or just unknown                              
-    const searchMatch = c.match(/^(?:search|search for|find|look 
-  up|google)\s+(.+)$/);                                                              
-    if (searchMatch) {                                      
-      const query = searchMatch[1].trim();                                           
-      const url = "https://www.google.com/search?q=" + encodeURIComponent(query);    
-      const msg = "Yes master. Searching for " + query + ".";
-      setAction(msg);                                                                
-      speak(msg, () => { openURL(url, query); setStatus("wake"); });
-      return;                                                                        
-    }
-                                                                                     
-    // Unknown                                              
-    const msg = "I didn't catch that, master. Please try again.";
-    setAction(msg, true);
-    speak(msg, () => setStatus("wake"));                                             
-  }
-                                                                                     
-  // ─────────────────────────────────────────────          
-  //  Speech recognition
-  // ─────────────────────────────────────────────
-  function buildRecognition() {                                                      
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRec) {                                                                
-      document.getElementById("browser-warn").style.display = "block";
-      return null;                                                                   
-    }                                                       
-
-    const r = new SpeechRec();                                                       
-    r.continuous      = true;
-    r.interimResults  = false;                                                       
-    r.lang            = "en-US";                            
-    r.maxAlternatives = 1;                                                           
-   
-    r.onresult = (e) => {                                                            
-      if (isSpeaking) return; // ignore while Jarvis is talking
-      const transcript = Array.from(e.results)                                       
-        .slice(e.resultIndex)
-        .map(res => res[0].transcript)                                               
-        .join(" ")                                          
-        .toLowerCase()                                                               
-        .trim();                                            
-
-      console.log("[STT]", transcript);                                              
-   
-      if (!awaitingCmd) {                                                            
-        if (transcript.includes(WAKE_PHRASE)) {             
-          // Check if command follows inline: "Jarvis open youtube"
-          const parts = transcript.split(WAKE_PHRASE);                               
-          const inline = parts[parts.length - 1].trim();                             
-          if (inline.length > 3) {                                                   
-            awaitingCmd = false;                                                     
-            handleCommand(inline);                          
-          } else {                                                                   
-            awaitingCmd = true;                             
-            setStatus("cmd");
-            speak("Yes, master?", null);                                             
-          }
-        }                                                                            
-      } else {                                                                       
-        awaitingCmd = false;
-        handleCommand(transcript);                                                   
-      }                                                     
-    };
-
-    r.onerror = (e) => {
-      if (e.error === "no-speech" || e.error === "aborted") return;
-      console.warn("[STT error]", e.error);                                          
-      if (e.error === "not-allowed") {
-        setAction("Microphone access denied. Please allow mic in browser settings.", 
-  true);                                                                             
-        setStatus("error");                                                          
-        listening = false;                                                           
-        return;                                             
-      }
-      if (listening && !isSpeaking) {
-        setTimeout(() => { try { r.start(); } catch(_) {} }, 600);                   
-      }
-    };                                                                               
-                                                            
-    r.onend = () => {
-      if (listening && !isSpeaking) {
-        setTimeout(() => { try { r.start(); } catch(_) {} }, 200);
-      }                                                                              
-    };
-                                                                                     
-    return r;                                               
-  }
-
-  function startListening() {
-    if (!recognition) recognition = buildRecognition();
-    if (!recognition) return;
-    listening    = true;                                                             
-    awaitingCmd  = false;
-    try { recognition.start(); } catch(_) {}                                         
-    setStatus("wake");                                      
-    micHint.textContent = "SAY \"JARVIS\" TO ACTIVATE";                              
-    speak("J.A.R.V.I.S. online. Awaiting your command, master.", null);
-  }                                                                                  
-                                                            
-  function stopListening() {                                                         
-    listening   = false;                                    
-    awaitingCmd = false;
-    if (recognition) try { recognition.stop(); } catch(_) {}                         
-    setStatus("idle");
-    micHint.textContent = "CLICK REACTOR TO ACTIVATE";                               
-  }                                                         
-
-  // ─────────────────────────────────────────────                                   
-  //  Reactor click toggle
-  // ─────────────────────────────────────────────                                   
-  reactor.addEventListener("click", () => {                 
-    if (listening) {                                                                 
-      stopListening();
-      setAction("Jarvis deactivated.");                                              
-    } else {                                                
-      startListening();
-    }
-  });                                                                                
-  </script>
-  </body>                                                                            
-  </html>                                                   
+       4    <meta charset="UTF-8" />                                                 
+       5    <meta name="viewport" content="width=device-width, initial-scale=1       
+          .0" />                                                                     
+       6    <title>J.A.R.V.I.S</title>                                               
+       7 -  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.       
+         -2/socket.io.min.js"></script>                                       
+       7    <style>
+       9 -    /* ── Reset & Base ── */                                        
+       8      *, *::before, *::after { box-sizing: border-box; margin: 0; padd
+          ing: 0; }
+       9  
+      10      :root {
+      11        --blue:      #00d4ff;
+      12        --blue-dim:  #0090b8;
+      13        --blue-dark: #003a4d;
+      16 -      --glow:      0 0 12px #00d4ff, 0 0 30px #00d4ff88, 0 0 60px #0
+         -0d4ff44;                                                            
+      14        --glow-soft: 0 0 8px #00d4ff66;
+      15        --bg:        #010b12;
+      16        --panel:     #020f18cc;
+     ...
+       18        --text-dim:  #4a8ea0;
+       19      }
+       20  
+       24 -    html, body {                                                   
+       25 -      height: 100%;                                                
+       26 -      background: var(--bg);                                       
+       27 -      font-family: 'Courier New', monospace;                       
+       28 -      color: var(--text);                                          
+       29 -      overflow: hidden;                                            
+       30 -    }                                                              
+       21 +    html, body { height: 100%; background: var(--bg); font-family: 
+          +'Courier New', monospace; color: var(--text); overflow: hidden; }  
+       22  
+       32 -    /* ── Scanline overlay ── */                                   
+       23      body::before {
+       34 -      content: '';                                                 
+       35 -      position: fixed; inset: 0; z-index: 999; pointer-events: none
+          -;                                                                  
+       36 -      background: repeating-linear-gradient(                       
+       37 -        to bottom,                                                 
+       38 -        transparent 0px,                                           
+       39 -        transparent 3px,                                           
+       40 -        rgba(0, 212, 255, 0.02) 3px,                               
+       41 -        rgba(0, 212, 255, 0.02) 4px                                
+       42 -      );                                                           
+       24 +      content: ''; position: fixed; inset: 0; z-index: 999; pointer
+          +-events: none;                                                     
+       25 +      background: repeating-linear-gradient(to bottom, transparent 
+          +0px, transparent 3px, rgba(0,212,255,0.02) 3px, rgba(0,212,255,0.02
+          +) 4px);                                                            
+       26      }
+       27  
+       45 -    /* ── Layout ── */                                             
+       46 -    .shell {                                                       
+       47 -      display: grid;                                               
+       48 -      grid-template-rows: 56px 1fr 80px;                           
+       49 -      grid-template-columns: 220px 1fr 220px;                      
+       50 -      height: 100vh;                                               
+       51 -      gap: 0;                                                      
+       52 -    }                                                              
+       28 +    .shell { display: grid; grid-template-rows: 56px 1fr 60px; grid
+          +-template-columns: 220px 1fr 220px; height: 100vh; }               
+       29  
+       30      /* ── Top bar ── */
+       55 -    .topbar {                                                      
+       56 -      grid-column: 1 / -1;                                         
+       57 -      display: flex; align-items: center; justify-content: space-be
+          -tween;                                                             
+       58 -      padding: 0 28px;                                             
+       59 -      border-bottom: 1px solid #00d4ff22;                          
+       60 -      background: var(--panel);                                    
+       61 -    }                                                              
+       62 -    .topbar-logo {                                                 
+       63 -      font-size: 13px; letter-spacing: 8px; font-weight: bold;     
+       64 -      color: var(--blue); text-shadow: var(--glow-soft);           
+       65 -    }                                                              
+       66 -    .topbar-right {                                                
+       67 -      font-size: 11px; color: var(--text-dim); letter-spacing: 3px;
+       68 -    }                                                              
+       69 -    #clock {                                                       
+       70 -      color: var(--blue); text-shadow: var(--glow-soft);           
+       71 -    }                                                              
+       31 +    .topbar { grid-column: 1/-1; display: flex; align-items: center
+          +; justify-content: space-between; padding: 0 28px; border-bottom: 1
+          +px solid #00d4ff22; background: var(--panel); }                    
+       32 +    .topbar-logo { font-size: 13px; letter-spacing: 8px; font-weigh
+          +t: bold; color: var(--blue); text-shadow: var(--glow-soft); }      
+       33 +    .topbar-right { font-size: 11px; color: var(--text-dim); letter
+          +-spacing: 3px; }                                                   
+       34 +    #clock { color: var(--blue); text-shadow: var(--glow-soft); }  
+       35  
+       36 +    .waveform { display: flex; align-items: center; gap: 3px; heigh
+          +t: 24px; }                                                         
+       37 +    .waveform .w { width: 3px; border-radius: 2px; background: var(
+          +--blue); animation: waveani 1.4s ease-in-out infinite; }           
+       38 +    .waveform .w:nth-child(1){animation-delay:.0s} .waveform .w:nth
+          +-child(2){animation-delay:.1s}                                     
+       39 +    .waveform .w:nth-child(3){animation-delay:.2s} .waveform .w:nth
+          +-child(4){animation-delay:.3s}                                     
+       40 +    .waveform .w:nth-child(5){animation-delay:.4s} .waveform .w:nth
+          +-child(6){animation-delay:.5s}                                     
+       41 +    .waveform .w:nth-child(7){animation-delay:.6s} .waveform .w:nth
+          +-child(8){animation-delay:.7s}                                     
+       42 +    .waveform .w:nth-child(9){animation-delay:.8s} .waveform .w:nth
+          +-child(10){animation-delay:.9s}                                    
+       43 +    @keyframes waveani { 0%,100%{height:4px;opacity:.3} 50%{height:
+          +20px;opacity:1;box-shadow:0 0 4px var(--blue)} }                   
+       44 +    .waveform.idle .w { animation-play-state: paused; height: 4px; 
+          +opacity: .2; }                                                     
+       45 +                                                                   
+       46      /* ── Sidebars ── */
+       74 -    .sidebar {                                                     
+       75 -      padding: 24px 16px;                                          
+       76 -      border-right: 1px solid #00d4ff18;                           
+       77 -      background: var(--panel);                                    
+       78 -      display: flex; flex-direction: column; gap: 20px;            
+       79 -    }                                                              
+       47 +    .sidebar { padding: 24px 16px; border-right: 1px solid #00d4ff1
+          +8; background: var(--panel); display: flex; flex-direction: column;
+          + gap: 18px; overflow: hidden; }                                    
+       48      .sidebar.right { border-right: none; border-left: 1px solid #00
+           d4ff18; }
+       49 +    .panel-block { border: 1px solid #00d4ff22; background: #020d17
+          +; padding: 12px 14px; border-radius: 4px; }                        
+       50 +    .panel-title { font-size: 9px; letter-spacing: 4px; color: var(
+          +--text-dim); margin-bottom: 10px; text-transform: uppercase; }     
+       51 +    .panel-value { font-size: 12px; color: var(--blue); line-height
+          +: 1.8; }                                                           
+       52  
+       82 -    .panel-block {                                                 
+       83 -      border: 1px solid #00d4ff22;                                 
+       84 -      background: #020d17;                                         
+       85 -      padding: 12px 14px;                                          
+       86 -      border-radius: 4px;                                          
+       87 -    }                                                              
+       88 -    .panel-title {                                                 
+       89 -      font-size: 9px; letter-spacing: 4px; color: var(--text-dim); 
+       90 -      margin-bottom: 10px; text-transform: uppercase;              
+       91 -    }                                                              
+       92 -    .panel-value {                                                 
+       93 -      font-size: 13px; color: var(--blue); line-height: 1.7;       
+       94 -    }                                                              
+       95 -                                                                   
+       96 -    /* Status indicator */                                         
+       97 -    .status-row {                                                  
+       98 -      display: flex; align-items: center; gap: 10px;               
+       99 -      font-size: 11px; letter-spacing: 2px;                        
+      100 -    }                                                              
+      101 -    .status-dot {                                                  
+      102 -      width: 8px; height: 8px; border-radius: 50%;                 
+      103 -      background: var(--blue);                                     
+      104 -      box-shadow: 0 0 6px var(--blue);                             
+      105 -      flex-shrink: 0;                                              
+      106 -      transition: background 0.3s;                                 
+      107 -    }                                                              
+       53 +    .status-row { display: flex; align-items: center; gap: 10px; fo
+          +nt-size: 11px; letter-spacing: 2px; }                              
+       54 +    .status-dot { width: 8px; height: 8px; border-radius: 50%; back
+          +ground: var(--blue); box-shadow: 0 0 6px var(--blue); flex-shrink: 
+          +0; transition: background .3s; }                                   
+       55      .status-dot.warn  { background: #ffaa00; box-shadow: 0 0 6px #f
+           faa00; }
+       56      .status-dot.error { background: #ff4444; box-shadow: 0 0 6px #f
+           f4444; }
+       57      .status-dot.pulse { animation: dotpulse 1s ease-in-out infinite
+           ; }
+       58 +    @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1)} 50%
+          +{opacity:.4;transform:scale(.6)} }                                 
+       59  
+      112 -    @keyframes dotpulse {                                          
+      113 -      0%, 100% { opacity: 1; transform: scale(1); }                
+      114 -      50%       { opacity: 0.4; transform: scale(0.6); }           
+      115 -    }                                                              
+      116 -                                                                   
+      117 -    /* Mini bar graph decoration */                                
+       60      .bars { display: flex; align-items: flex-end; gap: 3px; height:
+            40px; margin-top: 8px; }
+      119 -    .bar {                                                         
+      120 -      flex: 1; background: var(--blue-dark); border-radius: 2px 2px
+          - 0 0;                                                              
+      121 -      animation: barwave 2.4s ease-in-out infinite;                
+      122 -    }                                                              
+      123 -    .bar:nth-child(1) { animation-delay: 0.0s; }                   
+      124 -    .bar:nth-child(2) { animation-delay: 0.2s; }                   
+      125 -    .bar:nth-child(3) { animation-delay: 0.4s; }                   
+      126 -    .bar:nth-child(4) { animation-delay: 0.6s; }                   
+      127 -    .bar:nth-child(5) { animation-delay: 0.8s; }                   
+      128 -    .bar:nth-child(6) { animation-delay: 1.0s; }                   
+      129 -    .bar:nth-child(7) { animation-delay: 1.2s; }                   
+      130 -    @keyframes barwave {                                           
+      131 -      0%, 100% { height: 6px;  background: var(--blue-dark); }     
+      132 -      50%       { height: 34px; background: var(--blue); box-shadow
+          -: 0 0 6px var(--blue); }                                           
+      133 -    }                                                              
+       61 +    .bar { flex: 1; background: var(--blue-dark); border-radius: 2p
+          +x 2px 0 0; animation: barwave 2.4s ease-in-out infinite; }         
+       62 +    .bar:nth-child(1){animation-delay:.0s} .bar:nth-child(2){animat
+          +ion-delay:.2s} .bar:nth-child(3){animation-delay:.4s}              
+       63 +    .bar:nth-child(4){animation-delay:.6s} .bar:nth-child(5){animat
+          +ion-delay:.8s} .bar:nth-child(6){animation-delay:1s} .bar:nth-child
+          +(7){animation-delay:1.2s}                                          
+       64 +    @keyframes barwave { 0%,100%{height:6px;background:var(--blue-d
+          +ark)} 50%{height:34px;background:var(--blue);box-shadow:0 0 6px var
+          +(--blue)} }                                                        
+       65  
+      135 -    /* ── Center stage ── */                                       
+      136 -    .center {                                                      
+      137 -      display: flex; flex-direction: column;                       
+      138 -      align-items: center; justify-content: center;                
+      139 -      gap: 32px; position: relative; overflow: hidden;             
+      140 -    }                                                              
+       66 +    /* ── Center ── */                                             
+       67 +    .center { display: flex; flex-direction: column; align-items: c
+          +enter; justify-content: center; gap: 28px; position: relative; over
+          +flow: hidden; }                                                    
+       68 +    .center::before { content: ''; position: absolute; inset: 0; ba
+          +ckground: linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px)
+          +,linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px); b
+          +ackground-size: 40px 40px; }                                       
+       69  
+      142 -    /* grid lines */                                               
+      143 -    .center::before {                                              
+      144 -      content: '';                                                 
+      145 -      position: absolute; inset: 0;                                
+      146 -      background:                                                  
+      147 -        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      148 -        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparen
+          -t 1px);                                                            
+      149 -      background-size: 40px 40px;                                  
+      150 -    }                                                              
+      151 -                                                                   
+       70      /* ── Arc Reactor ── */
+      153 -    .reactor-wrap {                                                
+      154 -      position: relative; width: 240px; height: 240px;             
+      155 -      display: flex; align-items: center; justify-content: center; 
+      156 -      z-index: 2;                                                  
+      157 -    }                                                              
+      158 -                                                                   
+      159 -    /* outer rotating ring */                                      
+      160 -    .ring-outer {                                                  
+      161 -      position: absolute; inset: 0; border-radius: 50%;            
+      162 -      border: 2px solid transparent;                               
+      163 -      border-top-color: var(--blue);                               
+      164 -      border-right-color: var(--blue);                             
+      165 -      animation: spin 6s linear infinite;                          
+      166 -      box-shadow: 0 0 10px #00d4ff55;                              
+      167 -    }                                                              
+      168 -    .ring-mid {                                                    
+      169 -      position: absolute; inset: 12px; border-radius: 50%;         
+      170 -      border: 1px solid #00d4ff33;                                 
+      171 -      border-bottom-color: var(--blue);                            
+      172 -      animation: spin 4s linear infinite reverse;                  
+      173 -    }                                                              
+      174 -    .ring-inner {                                                  
+      175 -      position: absolute; inset: 30px; border-radius: 50%;         
+      176 -      border: 2px dashed #00d4ff22;                                
+      177 -      animation: spin 10s linear infinite;                         
+      178 -    }                                                              
+      179 -                                                                   
+       71 +    .reactor-wrap { position: relative; width: 240px; height: 240px
+          +; display: flex; align-items: center; justify-content: center; z-in
+          +dex: 2; }                                                          
+       72 +    .ring-outer { position: absolute; inset: 0; border-radius: 50%;
+          + border: 2px solid transparent; border-top-color: var(--blue); bord
+          +er-right-color: var(--blue); animation: spin 6s linear infinite; bo
+          +x-shadow: 0 0 10px #00d4ff55; }                                    
+       73 +    .ring-mid   { position: absolute; inset: 12px; border-radius: 5
+          +0%; border: 1px solid #00d4ff33; border-bottom-color: var(--blue); 
+          +animation: spin 4s linear infinite reverse; }                      
+       74 +    .ring-inner { position: absolute; inset: 30px; border-radius: 5
+          +0%; border: 2px dashed #00d4ff22; animation: spin 10s linear infini
+          +te; }                                                              
+       75      @keyframes spin { to { transform: rotate(360deg); } }
+       76  
+      182 -    /* the reactor core */                                         
+      183 -    .reactor-core {                                                
+      184 -      width: 140px; height: 140px;                                 
+      185 -      border-radius: 50%;                                          
+      186 -      background: radial-gradient(circle at 40% 35%,               
+      187 -        #b0f0ff 0%,                                                
+      188 -        #40cfff 20%,                                               
+      189 -        #00a8d6 40%,                                               
+      190 -        #003d5c 70%,                                               
+      191 -        #001a2e 100%                                               
+      192 -      );                                                           
+      193 -      box-shadow:                                                  
+      194 -        0 0 30px #00d4ffcc,                                        
+      195 -        0 0 70px #00d4ff88,                                        
+      196 -        0 0 120px #00d4ff44,                                       
+      197 -        inset 0 0 30px #005580;                                    
+      198 -      position: relative;                                          
+      199 -      animation: corepulse 3s ease-in-out infinite;                
+      200 -    }                                                              
+      201 -                                                                   
+       77 +    .reactor-core { width: 140px; height: 140px; border-radius: 50%
+          +; background: radial-gradient(circle at 40% 35%,#b0f0ff 0%,#40cfff 
+          +20%,#00a8d6 40%,#003d5c 70%,#001a2e 100%); box-shadow: 0 0 30px #00
+          +d4ffcc,0 0 70px #00d4ff88,0 0 120px #00d4ff44,inset 0 0 30px #00558
+          +0; position: relative; animation: corepulse 3s ease-in-out infinite
+          +; cursor: pointer; user-select: none; }                            
+       78 +    .reactor-core::after { content: ''; position: absolute; inset: 
+          +18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.15); 
+          +box-shadow: inset 0 0 20px rgba(0,180,220,.4); }                   
+       79      @keyframes corepulse {
+      203 -      0%, 100% {                                                   
+      204 -        box-shadow:                                                
+      205 -          0 0 30px #00d4ffcc,                                      
+      206 -          0 0 70px #00d4ff88,                                      
+      207 -          0 0 120px #00d4ff44,                                     
+      208 -          inset 0 0 30px #005580;                                  
+      209 -      }                                                            
+      210 -      50% {                                                        
+      211 -        box-shadow:                                                
+      212 -          0 0 50px #00d4ffee,                                      
+      213 -          0 0 110px #00d4ffaa,                                     
+      214 -          0 0 180px #00d4ff66,                                     
+      215 -          inset 0 0 50px #0088cc;                                  
+      216 -      }                                                            
+       80 +      0%,100% { box-shadow: 0 0 30px #00d4ffcc,0 0 70px #00d4ff88,0
+          + 0 120px #00d4ff44,inset 0 0 30px #005580; }                       
+       81 +      50%      { box-shadow: 0 0 50px #00d4ffee,0 0 110px #00d4ffaa
+          +,0 0 180px #00d4ff66,inset 0 0 50px #0088cc; }                     
+       82      }
+       83 +    .reactor-segments { position: absolute; inset: 40px; border-rad
+          +ius: 50%; background: conic-gradient(#00d4ff22 0deg,transparent 20d
+          +eg,transparent 60deg,#00d4ff22 60deg,transparent 80deg,transparent 
+          +120deg,#00d4ff22 120deg,transparent 140deg,transparent 180deg,#00d4
+          +ff22 180deg,transparent 200deg,transparent 240deg,#00d4ff22 240deg,
+          +transparent 260deg,transparent 300deg,#00d4ff22 300deg,transparent 
+          +320deg,transparent 360deg); animation: spin 20s linear infinite rev
+          +erse; }                                                            
+       84 +    .reactor-glow { position: absolute; inset: -40px; border-radius
+          +: 50%; background: radial-gradient(circle,#00d4ff1a 0%,transparent 
+          +70%); pointer-events: none; animation: corepulse 3s ease-in-out inf
+          +inite; }                                                           
+       85  
+      219 -    /* hexagonal bolt pattern overlay */                           
+      220 -    .reactor-core::after {                                         
+      221 -      content: '';                                                 
+      222 -      position: absolute; inset: 18px; border-radius: 50%;         
+      223 -      border: 2px solid rgba(255,255,255,0.15);                    
+      224 -      box-shadow: inset 0 0 20px rgba(0,180,220,0.4);              
+      225 -    }                                                              
+       86 +    .mic-hint { font-size: 9px; letter-spacing: 3px; color: var(--t
+          +ext-dim); margin-top: -16px; z-index: 2; text-align: center; }     
+       87 +    .badge { display: inline-block; font-size: 11px; letter-spacing
+          +: 4px; padding: 6px 20px; border: 1px solid var(--blue); color: var
+          +(--blue); text-shadow: var(--glow-soft); box-shadow: var(--glow-sof
+          +t); text-transform: uppercase; transition: all .4s; background: #00
+          +d4ff08; }                                                          
+       88 +    .command-feed { z-index: 2; text-align: center; max-width: 500p
+          +x; padding: 0 16px; }                                              
+       89 +    .feed-label { font-size: 9px; letter-spacing: 4px; color: var(-
+          +-text-dim); margin-bottom: 8px; }                                  
+       90 +    #last-command { font-size: 15px; color: var(--text); letter-spa
+          +cing: 2px; min-height: 22px; transition: all .3s; text-shadow: 0 0 
+          +8px rgba(0,212,255,.4); }                                          
+       91 +    #last-action  { font-size: 11px; color: var(--blue-dim); letter
+          +-spacing: 1px; margin-top: 6px; min-height: 18px; }                
+       92  
+      227 -    /* triangular segments */                                      
+      228 -    .reactor-segments {                                            
+      229 -      position: absolute; inset: 40px;                             
+      230 -      border-radius: 50%;                                          
+      231 -      background: conic-gradient(                                  
+      232 -        #00d4ff22 0deg, transparent 20deg,                         
+      233 -        transparent 40deg, #00d4ff22 60deg,                        
+      234 -        transparent 80deg, transparent 100deg,                     
+      235 -        #00d4ff22 120deg, transparent 140deg,                      
+      236 -        transparent 160deg, #00d4ff22 180deg,                      
+      237 -        transparent 200deg, transparent 220deg,                    
+      238 -        #00d4ff22 240deg, transparent 260deg,                      
+      239 -        transparent 280deg, #00d4ff22 300deg,                      
+      240 -        transparent 320deg, transparent 340deg,                    
+      241 -        #00d4ff22 360deg                                           
+      242 -      );                                                           
+      243 -      animation: spin 20s linear infinite reverse;                 
+      244 -    }                                                              
+      245 -                                                                   
+      246 -    /* ambient light bleed */                                      
+      247 -    .reactor-glow {                                                
+      248 -      position: absolute; inset: -40px; border-radius: 50%;        
+      249 -      background: radial-gradient(circle, #00d4ff1a 0%, transparent
+          - 70%);                                                             
+      250 -      pointer-events: none;                                        
+      251 -      animation: corepulse 3s ease-in-out infinite;                
+      252 -    }                                                              
+      253 -                                                                   
+      254 -    /* ── Status label ── */                                       
+      255 -    .status-label {                                                
+      256 -      z-index: 2; text-align: center;                              
+      257 -    }                                                              
+      258 -    .status-label .badge {                                         
+      259 -      display: inline-block;                                       
+      260 -      font-size: 11px; letter-spacing: 4px;                        
+      261 -      padding: 6px 20px;                                           
+      262 -      border: 1px solid var(--blue);                               
+      263 -      color: var(--blue);                                          
+      264 -      text-shadow: var(--glow-soft);                               
+      265 -      box-shadow: var(--glow-soft);                                
+      266 -      text-transform: uppercase;                                   
+      267 -      transition: all 0.4s ease;                                   
+      268 -      background: #00d4ff08;                                       
+      269 -    }                                                              
+      270 -                                                                   
+      271 -    /* ── Command feed ── */                                       
+      272 -    .command-feed {                                                
+      273 -      z-index: 2; text-align: center; max-width: 520px;            
+      274 -    }                                                              
+      275 -    .feed-label {                                                  
+      276 -      font-size: 9px; letter-spacing: 4px; color: var(--text-dim); 
+      277 -      margin-bottom: 8px;                                          
+      278 -    }                                                              
+      279 -    #last-command {                                                
+      280 -      font-size: 16px; color: var(--text); letter-spacing: 2px;    
+      281 -      min-height: 24px; transition: all 0.3s;                      
+      282 -      text-shadow: 0 0 8px rgba(0,212,255,0.4);                    
+      283 -    }                                                              
+      284 -    #last-action {                                                 
+      285 -      font-size: 11px; color: var(--blue-dim); letter-spacing: 1px;
+      286 -      margin-top: 6px; min-height: 18px;                           
+      287 -    }                                                              
+      288 -                                                                   
+       93      /* ── Bottom bar ── */
+      290 -    .bottombar {                                                   
+      291 -      grid-column: 1 / -1;                                         
+      292 -      display: flex; align-items: center; justify-content: space-be
+          -tween;                                                             
+      293 -      padding: 0 28px;                                             
+      294 -      border-top: 1px solid #00d4ff22;                             
+      295 -      background: var(--panel);                                    
+      296 -    }                                                              
+      297 -    .bottom-item {                                                 
+      298 -      font-size: 10px; letter-spacing: 3px; color: var(--text-dim);
+      299 -    }                                                              
+       94 +    .bottombar { grid-column: 1/-1; display: flex; align-items: cen
+          +ter; justify-content: space-between; padding: 0 28px; border-top: 1
+          +px solid #00d4ff22; background: var(--panel); }                    
+       95 +    .bottom-item { font-size: 10px; letter-spacing: 3px; color: var
+          +(--text-dim); }                                                    
+       96      .bottom-item span { color: var(--blue); }
+       97  
+      302 -    /* ── Typewriter cursor ── */                                  
+      303 -    .cursor { animation: blink 1s step-end infinite; }             
+      304 -    @keyframes blink { 50% { opacity: 0; } }                       
+       98 +    /* ── Log ── */                                                
+       99 +    #log { font-size: 10px; line-height: 2; max-height: 180px; over
+          +flow-y: auto; color: var(--text-dim); }                            
+      100 +    #log::-webkit-scrollbar { width: 4px; }                        
+      101 +    #log::-webkit-scrollbar-thumb { background: var(--blue-dark); b
+          +order-radius: 2px; }                                               
+      102  
+      306 -    /* ── Responsive waveform (top-center decoration) ── */        
+      307 -    .waveform {                                                    
+      308 -      display: flex; align-items: center; gap: 3px; height: 24px;  
+      103 +    /* ── Open URL overlay (always shown after site command) ── */ 
+      104 +    #open-overlay {                                                
+      105 +      display: none; position: fixed; inset: 0; z-index: 1000;     
+      106 +      background: rgba(1,11,18,.85); backdrop-filter: blur(4px);   
+      107 +      flex-direction: column; align-items: center; justify-content:
+          + center; gap: 24px;                                                
+      108      }
+      310 -    .waveform .w {                                                 
+      311 -      width: 3px; border-radius: 2px; background: var(--blue);     
+      312 -      animation: waveani 1.4s ease-in-out infinite;                
+      109 +    #open-overlay.visible { display: flex; animation: fadeIn .3s ea
+          +se; }                                                              
+      110 +    @keyframes fadeIn { from{opacity:0} to{opacity:1} }            
+      111 +    #open-overlay .ov-label { font-size: 10px; letter-spacing: 5px;
+          + color: var(--text-dim); }                                         
+      112 +    #open-overlay .ov-site  { font-size: 22px; letter-spacing: 4px;
+          + color: var(--blue); text-shadow: 0 0 20px #00d4ffaa; }            
+      113 +    #open-overlay .ov-btn {                                        
+      114 +      display: block; padding: 16px 48px; cursor: pointer;         
+      115 +      background: #00d4ff0a; border: 1px solid var(--blue);        
+      116 +      color: var(--blue); font-family: 'Courier New', monospace;   
+      117 +      font-size: 13px; letter-spacing: 5px; text-decoration: none; 
+      118 +      box-shadow: 0 0 24px #00d4ff44; text-transform: uppercase;   
+      119 +      transition: background .2s, box-shadow .2s;                  
+      120      }
+      314 -    .waveform .w:nth-child(1)  { animation-delay: 0.0s; }          
+      315 -    .waveform .w:nth-child(2)  { animation-delay: 0.1s; }          
+      316 -    .waveform .w:nth-child(3)  { animation-delay: 0.2s; }          
+      317 -    .waveform .w:nth-child(4)  { animation-delay: 0.3s; }          
+      318 -    .waveform .w:nth-child(5)  { animation-delay: 0.4s; }          
+      319 -    .waveform .w:nth-child(6)  { animation-delay: 0.5s; }          
+      320 -    .waveform .w:nth-child(7)  { animation-delay: 0.6s; }          
+      321 -    .waveform .w:nth-child(8)  { animation-delay: 0.7s; }          
+      322 -    .waveform .w:nth-child(9)  { animation-delay: 0.8s; }          
+      323 -    .waveform .w:nth-child(10) { animation-delay: 0.9s; }          
+      324 -    @keyframes waveani {                                           
+      325 -      0%, 100% { height: 4px; opacity: 0.3; }                      
+      326 -      50%       { height: 20px; opacity: 1; box-shadow: 0 0 4px var
+          -(--blue); }                                                        
+      327 -    }                                                              
+      328 -    .waveform.idle .w { animation-play-state: paused; height: 4px; 
+          -opacity: 0.2; }                                                    
+      121 +    #open-overlay .ov-btn:hover { background: #00d4ff22; box-shadow
+          +: 0 0 40px #00d4ff88; }                                            
+      122 +    #open-overlay .ov-dismiss { font-size: 9px; letter-spacing: 3px
+          +; color: var(--text-dim); cursor: pointer; margin-top: 8px; }      
+      123 +    #open-overlay .ov-dismiss:hover { color: var(--blue); }        
+      124  
+      330 -    /* notification flash */                                       
+      331 -    @keyframes flashin {                                           
+      332 -      from { opacity: 0; transform: translateY(6px); }             
+      333 -      to   { opacity: 1; transform: translateY(0); }               
+      334 -    }                                                              
+      335 -    .flash { animation: flashin 0.3s ease forwards; }              
+      125 +    /* ── Debug strip (small, bottom of center) ── */              
+      126 +    #debug-strip { position: absolute; bottom: 8px; left: 50%; tran
+          +sform: translateX(-50%); font-size: 9px; letter-spacing: 2px; color
+          +: #1a4a5a; z-index: 3; white-space: nowrap; }                      
+      127 +                                                                   
+      128 +    /* ── No-speech warning ── */                                  
+      129 +    #warn-bar { display: none; position: fixed; top: 64px; left: 50
+          +%; transform: translateX(-50%); background: #1a0800; border: 1px so
+          +lid #ff6600; color: #ff9944; font-size: 11px; letter-spacing: 2px; 
+          +padding: 8px 24px; z-index: 1001; }                                
+      130 +                                                                   
+      131 +    @keyframes pop { from{opacity:0;transform:translateY(4px)} to{o
+          +pacity:1;transform:translateY(0)} }                                
+      132 +    .pop { animation: pop .25s ease forwards; }                    
+      133    </style>
+      134  </head>
+      135  <body>
+      339 -<div class="shell">                                                
+      136  
+      341 -  <!-- Top bar -->                                                 
+      137 +<!-- URL open overlay — always requires a click so popup blockers n
+          +ever interfere -->                                                 
+      138 +<div id="open-overlay">                                            
+      139 +  <div class="ov-label">READY TO OPEN</div>                        
+      140 +  <div class="ov-site" id="ov-site-name">—</div>                   
+      141 +  <a id="ov-btn" class="ov-btn" href="#" target="_blank" rel="noope
+          +ner">TAP TO OPEN</a>                                               
+      142 +  <div class="ov-dismiss" id="ov-dismiss">DISMISS</div>            
+      143 +</div>                                                             
+      144 +                                                                   
+      145 +<div id="warn-bar"></div>                                          
+      146 +                                                                   
+      147 +<div class="shell">                                                
+      148    <header class="topbar">
+      149      <div class="topbar-logo">J.A.R.V.I.S</div>
+      344 -    <div class="waveform" id="waveform">                           
+      345 -      <div class="w"></div><div class="w"></div><div class="w"></di
+          -v>                                                                 
+      346 -      <div class="w"></div><div class="w"></div><div class="w"></di
+          -v>                                                                 
+      347 -      <div class="w"></div><div class="w"></div><div class="w"></di
+          -v>                                                                 
+      348 -      <div class="w"></div>                                        
+      150 +    <div class="waveform idle" id="waveform">                      
+      151 +      <div class="w"></div><div class="w"></div><div class="w"></di
+          +v><div class="w"></div><div class="w"></div>                       
+      152 +      <div class="w"></div><div class="w"></div><div class="w"></di
+          +v><div class="w"></div><div class="w"></div>                       
+      153      </div>
+      154      <div class="topbar-right"><span id="clock">00:00:00</span> &nbs
+           p;|&nbsp; ONLINE</div>
+      155    </header>
+      156  
+      353 -  <!-- Left sidebar -->                                            
+      157    <aside class="sidebar">
+      158      <div class="panel-block">
+      159        <div class="panel-title">System Status</div>
+      160        <div class="status-row">
+      358 -        <div class="status-dot pulse" id="status-dot"></div>       
+      359 -        <div class="panel-value" id="status-text">INITIALIZING</div
+          ->                                                                  
+      161 +        <div class="status-dot" id="status-dot"></div>             
+      162 +        <div class="panel-value" id="status-text">IDLE</div>       
+      163        </div>
+      164      </div>
+      165      <div class="panel-block">
+      166        <div class="panel-title">Audio Input</div>
+      167        <div class="bars">
+      168          <div class="bar"></div><div class="bar"></div><div class="b
+           ar"></div>
+      366 -        <div class="bar"></div><div class="bar"></div><div class="b
+          -ar"></div>                                                         
+      367 -        <div class="bar"></div>                                    
+      169 +        <div class="bar"></div><div class="bar"></div><div class="b
+          +ar"></div><div class="bar"></div>                                  
+      170        </div>
+      171      </div>
+      172      <div class="panel-block">
+      173        <div class="panel-title">Wake Phrase</div>
+      174        <div class="panel-value">"JARVIS"</div>
+      175      </div>
+      176 +    <div class="panel-block">                                      
+      177 +      <div class="panel-title">State</div>                         
+      178 +      <div class="panel-value" id="mode-text" style="color:var(--te
+          +xt-dim)">STANDBY</div>                                             
+      179 +    </div>                                                         
+      180    </aside>
+      181  
+      376 -  <!-- Center -->                                                  
+      182    <main class="center">
+      378 -    <div class="reactor-wrap">                                     
+      183 +    <div class="reactor-wrap" id="reactor" title="Click to activate
+          + / deactivate">                                                    
+      184        <div class="reactor-glow"></div>
+      185        <div class="ring-outer"></div>
+      186        <div class="ring-mid"></div>
+     ...
+      189        <div class="reactor-core"></div>
+      190      </div>
+      191  
+      192 +    <div class="mic-hint" id="mic-hint">CLICK REACTOR TO ACTIVATE</
+          +div>                                                               
+      193 +                                                                   
+      194      <div class="status-label">
+      195        <div class="badge" id="status-badge">IDLE</div>
+      196      </div>
+     ...
+      198      <div class="command-feed">
+      199        <div class="feed-label">LAST COMMAND</div>
+      200        <div id="last-command">—</div>
+      394 -      <div id="last-action">Awaiting input...</div>                
+      201 +      <div id="last-action">Click the reactor to begin.</div>      
+      202      </div>
+      203 +                                                                   
+      204 +    <div id="debug-strip">STT: idle</div>                          
+      205    </main>
+      206  
+      398 -  <!-- Right sidebar -->                                           
+      207    <aside class="sidebar right">
+      208      <div class="panel-block">
+      209        <div class="panel-title">Command Log</div>
+      402 -      <div class="panel-value" id="log" style="font-size:11px;line-
+          -height:2;max-height:200px;overflow-y:auto;color:var(--text-dim);"> 
+      403 -        —                                                          
+      404 -      </div>                                                       
+      210 +      <div id="log">—</div>                                        
+      211      </div>
+      212      <div class="panel-block">
+      213        <div class="panel-title">Quick Reference</div>
+      214        <div class="panel-value" style="font-size:10px;line-height:2;
+           color:var(--text-dim);">
+      409 -        open chrome<br>                                            
+      410 -        open terminal<br>                                          
+      411 -        open youtube<br>                                           
+      412 -        open gmail<br>                                             
+      413 -        what time is it<br>                                        
+      414 -        quit jarvis                                                
+      215 +        open youtube<br>open gmail<br>open chatgpt<br>open netflix<
+          +br>                                                                
+      216 +        open github<br>open [any site]<br>what time is it<br>quit j
+          +arvis                                                              
+      217        </div>
+      218      </div>
+      219    </aside>
+      220  
+      419 -  <!-- Bottom bar -->                                              
+      221    <footer class="bottombar">
+      222      <div class="bottom-item">STARK INDUSTRIES &nbsp; v1.0</div>
+      223      <div class="bottom-item">CORE POWER &nbsp;<span>ARC REACTOR</sp
+           an></div>
+      224      <div class="bottom-item">SYSTEM &nbsp;<span>NOMINAL</span></div
+           >
+      225    </footer>
+      425 -                                                                   
+      226  </div>
+      227  
+      228  <script>
+      429 -  // ── Clock ──                                                   
+      430 -  function updateClock() {                                         
+      431 -    const now = new Date();                                        
+      432 -    document.getElementById('clock').textContent =                 
+      433 -      now.toLocaleTimeString('en-US', { hour12: false });          
+      229 +// ═══════════════════════════════════════════════                 
+      230 +//  CONFIG                                                         
+      231 +// ═══════════════════════════════════════════════                 
+      232 +const WAKE = "jarvis";                                             
+      233 +                                                                   
+      234 +const SITES = {                                                    
+      235 +  "youtube":         "https://youtube.com",                        
+      236 +  "gmail":           "https://mail.google.com",                    
+      237 +  "google":          "https://google.com",                         
+      238 +  "chatgpt":         "https://chat.openai.com",                    
+      239 +  "chat gpt":        "https://chat.openai.com",                    
+      240 +  "netflix":         "https://netflix.com",                        
+      241 +  "spotify":         "https://open.spotify.com",                   
+      242 +  "spotify web":     "https://open.spotify.com",                   
+      243 +  "github":          "https://github.com",                         
+      244 +  "twitter":         "https://twitter.com",                        
+      245 +  "x":               "https://x.com",                              
+      246 +  "reddit":          "https://reddit.com",                         
+      247 +  "linkedin":        "https://linkedin.com",                       
+      248 +  "amazon":          "https://amazon.com",                         
+      249 +  "instagram":       "https://instagram.com",                      
+      250 +  "facebook":        "https://facebook.com",                       
+      251 +  "whatsapp":        "https://web.whatsapp.com",                   
+      252 +  "notion":          "https://notion.so",                          
+      253 +  "figma":           "https://figma.com",                          
+      254 +  "claude":          "https://claude.ai",                          
+      255 +  "vercel":          "https://vercel.com",                         
+      256 +  "hacker news":     "https://news.ycombinator.com",               
+      257 +  "wikipedia":       "https://wikipedia.org",                      
+      258 +  "maps":            "https://maps.google.com",                    
+      259 +  "google maps":     "https://maps.google.com",                    
+      260 +  "drive":           "https://drive.google.com",                   
+      261 +  "google drive":    "https://drive.google.com",                   
+      262 +  "calendar":        "https://calendar.google.com",                
+      263 +  "docs":            "https://docs.google.com",                    
+      264 +  "google docs":     "https://docs.google.com",                    
+      265 +  "sheets":          "https://sheets.google.com",                  
+      266 +  "slides":          "https://slides.google.com",                  
+      267 +  "meet":            "https://meet.google.com",                    
+      268 +  "zoom":            "https://zoom.us",                            
+      269 +  "twitch":          "https://twitch.tv",                          
+      270 +  "discord":         "https://discord.com/app",                    
+      271 +  "slack":           "https://app.slack.com",                      
+      272 +  "pinterest":       "https://pinterest.com",                      
+      273 +  "tiktok":          "https://tiktok.com",                         
+      274 +  "stackoverflow":   "https://stackoverflow.com",                  
+      275 +  "stack overflow":  "https://stackoverflow.com",                  
+      276 +  "medium":          "https://medium.com",                         
+      277 +  "paypal":          "https://paypal.com",                         
+      278 +};                                                                 
+      279 +                                                                   
+      280 +const DESKTOP_APPS = ["terminal","finder","safari","chrome","vscode
+          +","vs code","xcode","calculator","notes","messages","mail","music",
+          +"photos","keynote"];                                               
+      281 +                                                                   
+      282 +// ═══════════════════════════════════════════════                 
+      283 +//  STATE MACHINE                                                  
+      284 +//  idle → wake → command → (back to wake)                         
+      285 +// ═══════════════════════════════════════════════                 
+      286 +const State = { IDLE: 0, WAKE: 1, CMD: 2 };                        
+      287 +let state     = State.IDLE;                                        
+      288 +let rec       = null;   // current SpeechRecognition instance      
+      289 +let speaking  = false;                                             
+      290 +                                                                   
+      291 +// ═══════════════════════════════════════════════                 
+      292 +//  DOM                                                            
+      293 +// ═══════════════════════════════════════════════                 
+      294 +const $  = id => document.getElementById(id);                      
+      295 +const dot     = $("status-dot");                                   
+      296 +const stTxt   = $("status-text");                                  
+      297 +const badge   = $("status-badge");                                 
+      298 +const modeTxt = $("mode-text");                                    
+      299 +const wf      = $("waveform");                                     
+      300 +const cmdEl   = $("last-command");                                 
+      301 +const actEl   = $("last-action");                                  
+      302 +const logEl   = $("log");                                          
+      303 +const hintEl  = $("mic-hint");                                     
+      304 +const dbgEl   = $("debug-strip");                                  
+      305 +const overlay = $("open-overlay");                                 
+      306 +const ovSite  = $("ov-site-name");                                 
+      307 +const ovBtn   = $("ov-btn");                                       
+      308 +const ovDismiss = $("ov-dismiss");                                 
+      309 +const warnBar = $("warn-bar");                                     
+      310 +                                                                   
+      311 +// ═══════════════════════════════════════════════                 
+      312 +//  CLOCK                                                          
+      313 +// ═══════════════════════════════════════════════                 
+      314 +setInterval(() => {                                                
+      315 +  $("clock").textContent = new Date().toLocaleTimeString("en-US", {
+          + hour12: false });                                                 
+      316 +}, 1000);                                                          
+      317 +                                                                   
+      318 +// ═══════════════════════════════════════════════                 
+      319 +//  UI HELPERS                                                     
+      320 +// ═══════════════════════════════════════════════                 
+      321 +const STATUS = {                                                   
+      322 +  idle:  { label:"IDLE",         badge:"IDLE",      dot:"",      mo
+          +de:"STANDBY"   },                                                  
+      323 +  wake:  { label:"LISTENING",    badge:"LISTENING", dot:"pulse", mo
+          +de:"WAKE WORD" },                                                  
+      324 +  cmd:   { label:"CAPTURING",    badge:"CAPTURING", dot:"pulse", mo
+          +de:"COMMAND"   },                                                  
+      325 +  exec:  { label:"EXECUTING",    badge:"EXECUTING", dot:"warn",  mo
+          +de:"EXECUTE"   },                                                  
+      326 +  speak: { label:"SPEAKING",     badge:"SPEAKING",  dot:"pulse", mo
+          +de:"OUTPUT"    },                                                  
+      327 +  error: { label:"ERROR",        badge:"ERROR",     dot:"error", mo
+          +de:"ERROR"     },                                                  
+      328 +};                                                                 
+      329 +                                                                   
+      330 +function ui(key) {                                                 
+      331 +  const s = STATUS[key] || STATUS.idle;                            
+      332 +  dot.className = "status-dot " + s.dot;                           
+      333 +  stTxt.textContent = s.label;                                     
+      334 +  badge.textContent = s.badge;                                     
+      335 +  modeTxt.textContent = s.mode;                                    
+      336 +  wf.classList.toggle("idle", key !== "wake" && key !== "cmd");    
+      337 +}                                                                  
+      338 +                                                                   
+      339 +function setCmd(text) {                                            
+      340 +  cmdEl.textContent = text;                                        
+      341 +  cmdEl.classList.remove("pop"); void cmdEl.offsetWidth; cmdEl.clas
+          +sList.add("pop");                                                  
+      342 +}                                                                  
+      343 +                                                                   
+      344 +function setAction(text, err = false) {                            
+      345 +  actEl.textContent = text;                                        
+      346 +  if (logEl.textContent === "—") logEl.textContent = "";           
+      347 +  const line = document.createElement("div");                      
+      348 +  line.textContent = "> " + text;                                  
+      349 +  line.style.color = err ? "#ff5555" : "var(--blue)";              
+      350 +  line.classList.add("pop");                                       
+      351 +  logEl.appendChild(line);                                         
+      352 +  logEl.scrollTop = logEl.scrollHeight;                            
+      353 +  while (logEl.children.length > 25) logEl.removeChild(logEl.firstC
+          +hild);                                                             
+      354 +}                                                                  
+      355 +                                                                   
+      356 +function dbg(msg) { dbgEl.textContent = "STT: " + msg; }           
+      357 +                                                                   
+      358 +function warn(msg, ms = 4000) {                                    
+      359 +  warnBar.textContent = msg;                                       
+      360 +  warnBar.style.display = "block";                                 
+      361 +  clearTimeout(warn._t);                                           
+      362 +  warn._t = setTimeout(() => { warnBar.style.display = "none"; }, m
+          +s);                                                                
+      363 +}                                                                  
+      364 +                                                                   
+      365 +// ═══════════════════════════════════════════════                 
+      366 +//  TTS  — pauses mic so Jarvis can't hear itself                  
+      367 +// ═══════════════════════════════════════════════                 
+      368 +const synth = window.speechSynthesis;                              
+      369 +let voices  = [];                                                  
+      370 +                                                                   
+      371 +function loadVoices() { voices = synth.getVoices(); }              
+      372 +synth.addEventListener("voiceschanged", loadVoices);               
+      373 +loadVoices();                                                      
+      374 +                                                                   
+      375 +function speak(text, cb) {                                         
+      376 +  if (!synth) { cb && cb(); return; }                              
+      377 +  synth.cancel();                                                  
+      378 +  speaking = true;                                                 
+      379 +  ui("speak");                                                     
+      380 +                                                                   
+      381 +  // Kill current recognition so it doesn't capture TTS audio      
+      382 +  killRec();                                                       
+      383 +                                                                   
+      384 +  const utt = new SpeechSynthesisUtterance(text);                  
+      385 +  utt.rate  = 1.0;                                                 
+      386 +  utt.pitch = 0.85;                                                
+      387 +                                                                   
+      388 +  const best = voices.find(v =>                                    
+      389 +    v.name.includes("Google UK English Male") ||                   
+      390 +    v.name.includes("Daniel")  ||                                  
+      391 +    v.name.includes("Alex")    ||                                  
+      392 +    v.name.includes("Google US English")                           
+      393 +  );                                                               
+      394 +  if (best) utt.voice = best;                                      
+      395 +                                                                   
+      396 +  utt.onend = utt.onerror = () => {                                
+      397 +    speaking = false;                                              
+      398 +    cb && cb();                                                    
+      399 +  };                                                               
+      400 +                                                                   
+      401 +  synth.speak(utt);                                                
+      402 +}                                                                  
+      403 +                                                                   
+      404 +// ═══════════════════════════════════════════════                 
+      405 +//  RECOGNITION  — fresh instance every call                       
+      406 +//  (avoids all continuous-mode timing bugs)                       
+      407 +// ═══════════════════════════════════════════════                 
+      408 +const SpeechRec = window.SpeechRecognition || window.webkitSpeechRe
+          +cognition;                                                         
+      409 +                                                                   
+      410 +function killRec() {                                               
+      411 +  if (rec) {                                                       
+      412 +    rec.onresult = rec.onerror = rec.onend = null;                 
+      413 +    try { rec.abort(); } catch(_) {}                               
+      414 +    rec = null;                                                    
+      415    }
+      435 -  setInterval(updateClock, 1000);                                  
+      436 -  updateClock();                                                   
+      416 +}                                                                  
+      417  
+      438 -  // ── Socket.IO ──                                               
+      439 -  const socket = io();                                             
+      418 +function listen() {                                                
+      419 +  if (state === State.IDLE || speaking) return;                    
+      420 +  killRec();                                                       
+      421  
+      441 -  const STATUS_MAP = {                                             
+      442 -    idle:             { label: 'IDLE',                    dot: '', 
+          -     badge: 'IDLE' },                                              
+      443 -    listening_wake:   { label: 'LISTENING FOR WAKE WORD', dot: 'pul
+          -se', badge: 'LISTENING' },                                         
+      444 -    listening_command:{ label: 'LISTENING FOR COMMAND',   dot: 'pul
+          -se', badge: 'CAPTURING' },                                         
+      445 -    executing:        { label: 'EXECUTING COMMAND',       dot: 'war
+          -n',  badge: 'EXECUTING' },                                         
+      446 -    speaking:         { label: 'SPEAKING',                dot: 'pul
+          -se', badge: 'SPEAKING' },                                          
+      447 -    error:            { label: 'ERROR',                   dot: 'err
+          -or', badge: 'ERROR' },                                             
+      422 +  if (!SpeechRec) {                                                
+      423 +    warn("⚠ Use Chrome or Edge — Web Speech API not supported here.
+          +");                                                                
+      424 +    return;                                                        
+      425 +  }                                                                
+      426 +                                                                   
+      427 +  rec = new SpeechRec();                                           
+      428 +  rec.continuous      = false;  // one phrase at a time — most reli
+          +able                                                               
+      429 +  rec.interimResults  = false;                                     
+      430 +  rec.lang            = "en-US";                                   
+      431 +  rec.maxAlternatives = 3;                                         
+      432 +                                                                   
+      433 +  rec.onresult = (e) => {                                          
+      434 +    // Collect all alternatives from all results                   
+      435 +    const texts = [];                                              
+      436 +    for (let i = 0; i < e.results.length; i++) {                   
+      437 +      for (let j = 0; j < e.results[i].length; j++) {              
+      438 +        texts.push(e.results[i][j].transcript.toLowerCase().trim())
+          +;                                                                  
+      439 +      }                                                            
+      440 +    }                                                              
+      441 +    dbg(texts[0] || "?");                                          
+      442 +    onHeard(texts);                                                
+      443    };
+      444  
+      450 -  const dot   = document.getElementById('status-dot');             
+      451 -  const stTxt = document.getElementById('status-text');            
+      452 -  const badge = document.getElementById('status-badge');           
+      453 -  const wf    = document.getElementById('waveform');               
+      445 +  rec.onerror = (e) => {                                           
+      446 +    dbg("err:" + e.error);                                         
+      447 +    if (e.error === "not-allowed" || e.error === "service-not-allow
+          +ed") {                                                             
+      448 +      warn("⚠ Microphone access denied. Allow it in Chrome → addres
+          +s bar → lock icon.");                                              
+      449 +      state = State.IDLE;                                          
+      450 +      ui("error");                                                 
+      451 +      return;                                                      
+      452 +    }                                                              
+      453 +    // no-speech / network / aborted → just restart                
+      454 +    if (state !== State.IDLE && !speaking) setTimeout(listen, 400);
+      455 +  };                                                               
+      456  
+      455 -  socket.on('status', ({ status }) => {                            
+      456 -    const s = STATUS_MAP[status] || STATUS_MAP.idle;               
+      457 -    dot.className   = 'status-dot ' + s.dot;                       
+      458 -    stTxt.textContent = s.label;                                   
+      459 -    badge.textContent = s.badge;                                   
+      457 +  rec.onend = () => {                                              
+      458 +    if (state !== State.IDLE && !speaking) setTimeout(listen, 150);
+      459 +  };                                                               
+      460  
+      461 -    // waveform active only when listening                         
+      462 -    if (status === 'listening_wake' || status === 'listening_comman
+          -d') {                                                              
+      463 -      wf.classList.remove('idle');                                 
+      461 +  try { rec.start(); } catch(e) { setTimeout(listen, 500); }       
+      462 +}                                                                  
+      463 +                                                                   
+      464 +function onHeard(texts) {                                          
+      465 +  const first = texts[0] || "";                                    
+      466 +                                                                   
+      467 +  if (state === State.WAKE) {                                      
+      468 +    // Check all alternatives for wake word                        
+      469 +    const wakeHit = texts.find(t => t.includes(WAKE));             
+      470 +    if (!wakeHit) { listen(); return; }  // not the wake word — kee
+          +p listening                                                        
+      471 +                                                                   
+      472 +    // Check if command is inline: "Jarvis open youtube"           
+      473 +    const after = wakeHit.split(WAKE).pop().trim();                
+      474 +    if (after.length > 3) {                                        
+      475 +      // Command came in same breath                               
+      476 +      handleCommand(after);                                        
+      477      } else {
+      465 -      wf.classList.add('idle');                                    
+      478 +      state = State.CMD;                                           
+      479 +      ui("cmd");                                                   
+      480 +      hintEl.textContent = "LISTENING FOR COMMAND...";             
+      481 +      setCmd("Wake word detected");                                
+      482 +      speak("Yes, master?", () => listen());                       
+      483      }
+      467 -  });                                                              
+      484  
+      469 -  socket.on('transcript', ({ text }) => {                          
+      470 -    const el = document.getElementById('last-command');            
+      471 -    el.textContent = text;                                         
+      472 -    el.classList.remove('flash');                                  
+      473 -    void el.offsetWidth;                                           
+      474 -    el.classList.add('flash');                                     
+      475 -  });                                                              
+      485 +  } else if (state === State.CMD) {                                
+      486 +    state = State.WAKE;  // reset so we can hear next wake word aft
+          +er this command                                                    
+      487 +    handleCommand(first);                                          
+      488 +  }                                                                
+      489 +}                                                                  
+      490  
+      477 -  socket.on('action', ({ action, response }) => {                  
+      478 -    document.getElementById('last-action').textContent = response; 
+      491 +// ═══════════════════════════════════════════════                 
+      492 +//  URL RESOLVER  — works for literally anything                   
+      493 +// ═══════════════════════════════════════════════                 
+      494 +function resolveURL(target) {                                      
+      495 +  const t = target.toLowerCase().trim();                           
+      496  
+      480 -    // append to log                                               
+      481 -    const log = document.getElementById('log');                    
+      482 -    const line = document.createElement('div');                    
+      483 -    line.textContent = `> ${response}`;                            
+      484 -    line.style.color = action === 'error' ? '#ff5555' : 'var(--blue
+          -)';                                                                
+      485 -    line.classList.add('flash');                                   
+      486 -    log.appendChild(line);                                         
+      487 -    log.scrollTop = log.scrollHeight;                              
+      497 +  // Exact match                                                   
+      498 +  if (SITES[t]) return SITES[t];                                   
+      499  
+      489 -    // trim log                                                    
+      490 -    while (log.children.length > 20) log.removeChild(log.firstChild
+          -);                                                                 
+      491 -  });                                                              
+      500 +  // Partial / contains match                                      
+      501 +  for (const [k, v] of Object.entries(SITES)) {                    
+      502 +    if (t.includes(k) || k.includes(t)) return v;                  
+      503 +  }                                                                
+      504  
+      493 -  socket.on('connect', () => console.log('[JARVIS] UI connected'));
+      505 +  // Looks like a domain already (e.g. "espn.com")                 
+      506 +  if (/^[\w.-]+\.[a-z]{2,}$/.test(t)) {                            
+      507 +    return (t.startsWith("http") ? t : "https://" + t);            
+      508 +  }                                                                
+      509 +                                                                   
+      510 +  // Single word — assume .com (e.g. "espn" → espn.com)            
+      511 +  if (!t.includes(" ") && t.length > 2) {                          
+      512 +    return "https://" + t + ".com";                                
+      513 +  }                                                                
+      514 +                                                                   
+      515 +  // Multi-word fallback — Google search                           
+      516 +  return "https://www.google.com/search?q=" + encodeURIComponent(ta
+          +rget);                                                             
+      517 +}                                                                  
+      518 +                                                                   
+      519 +function isDesktopApp(t) {                                         
+      520 +  return DESKTOP_APPS.some(a => t.toLowerCase().includes(a));      
+      521 +}                                                                  
+      522 +                                                                   
+      523 +// ═══════════════════════════════════════════════                 
+      524 +//  OPEN OVERLAY  — click always works, no popup blocker           
+      525 +// ═══════════════════════════════════════════════                 
+      526 +let overlayDismissTimer = null;                                    
+      527 +                                                                   
+      528 +function showOverlay(url, label) {                                 
+      529 +  ovSite.textContent = label.toUpperCase();                        
+      530 +  ovBtn.href = url;                                                
+      531 +  overlay.classList.add("visible");                                
+      532 +  clearTimeout(overlayDismissTimer);                               
+      533 +  overlayDismissTimer = setTimeout(dismissOverlay, 15000);         
+      534 +}                                                                  
+      535 +                                                                   
+      536 +function dismissOverlay() {                                        
+      537 +  overlay.classList.remove("visible");                             
+      538 +  clearTimeout(overlayDismissTimer);                               
+      539 +}                                                                  
+      540 +                                                                   
+      541 +ovDismiss.addEventListener("click", dismissOverlay);               
+      542 +ovBtn.addEventListener("click", () => {                            
+      543 +  setTimeout(dismissOverlay, 300);                                 
+      544 +});                                                                
+      545 +                                                                   
+      546 +// ═══════════════════════════════════════════════                 
+      547 +//  COMMAND HANDLER                                                
+      548 +// ═══════════════════════════════════════════════                 
+      549 +function handleCommand(cmd) {                                      
+      550 +  const c = cmd.toLowerCase().trim();                              
+      551 +  setCmd(cmd);                                                     
+      552 +  ui("exec");                                                      
+      553 +  dbg("cmd: " + c);                                                
+      554 +                                                                   
+      555 +  // ── Quit ──                                                    
+      556 +  if (/\b(quit|exit|goodbye|bye|shut down|shutdown|stop)\b/.test(c)
+          +) {                                                                
+      557 +    speak("Goodbye, master. Going offline.", () => {               
+      558 +      stopJarvis();                                                
+      559 +      setAction("Jarvis offline.");                                
+      560 +    });                                                            
+      561 +    return;                                                        
+      562 +  }                                                                
+      563 +                                                                   
+      564 +  // ── Time ──                                                    
+      565 +  if (/\btime\b/.test(c) && !/\bdate\b/.test(c)) {                 
+      566 +    const t = new Date().toLocaleTimeString("en-US", { hour:"numeri
+          +c", minute:"2-digit" });                                           
+      567 +    const msg = "Yes master. The current time is " + t + ".";      
+      568 +    setAction(msg);                                                
+      569 +    speak(msg, goWake);                                            
+      570 +    return;                                                        
+      571 +  }                                                                
+      572 +                                                                   
+      573 +  // ── Date ──                                                    
+      574 +  if (/\b(date|today|what day|what's today)\b/.test(c)) {          
+      575 +    const d = new Date().toLocaleDateString("en-US", { weekday:"lon
+          +g", year:"numeric", month:"long", day:"numeric" });                
+      576 +    const msg = "Yes master. Today is " + d + ".";                 
+      577 +    setAction(msg);                                                
+      578 +    speak(msg, goWake);                                            
+      579 +    return;                                                        
+      580 +  }                                                                
+      581 +                                                                   
+      582 +  // ── Open / navigate ──                                         
+      583 +  const openRx = /^(?:open|go to|navigate to|launch|show me|take me
+          + to|load)\s+(.+)$/;                                                
+      584 +  const om = c.match(openRx);                                      
+      585 +  if (om) {                                                        
+      586 +    const target = om[1].trim();                                   
+      587 +                                                                   
+      588 +    if (isDesktopApp(target)) {                                    
+      589 +      const msg = "I can't open desktop apps from the browser, mast
+          +er.";                                                              
+      590 +      setAction(msg, true);                                        
+      591 +      speak(msg, goWake);                                          
+      592 +      return;                                                      
+      593 +    }                                                              
+      594 +                                                                   
+      595 +    const url  = resolveURL(target);                               
+      596 +    const label = target.charAt(0).toUpperCase() + target.slice(1);
+      597 +    const msg  = "Yes master. Opening " + label + ".";             
+      598 +    setAction(msg);                                                
+      599 +    speak(msg, () => { showOverlay(url, label); goWake(); });      
+      600 +    return;                                                        
+      601 +  }                                                                
+      602 +                                                                   
+      603 +  // ── Search fallback ──                                         
+      604 +  const searchRx = /^(?:search|search for|find|look up|google)\s+(.
+          ++)$/;                                                              
+      605 +  const sm = c.match(searchRx);                                    
+      606 +  if (sm) {                                                        
+      607 +    const query = sm[1].trim();                                    
+      608 +    const url   = "https://www.google.com/search?q=" + encodeURICom
+          +ponent(query);                                                     
+      609 +    const msg   = "Yes master. Searching for " + query + ".";      
+      610 +    setAction(msg);                                                
+      611 +    speak(msg, () => { showOverlay(url, query); goWake(); });      
+      612 +    return;                                                        
+      613 +  }                                                                
+      614 +                                                                   
+      615 +  // ── Unknown ──                                                 
+      616 +  const msg = "I didn't catch that, master. Please try again.";    
+      617 +  setAction(msg, true);                                            
+      618 +  speak(msg, goWake);                                              
+      619 +}                                                                  
+      620 +                                                                   
+      621 +function goWake() {                                                
+      622 +  state = State.WAKE;                                              
+      623 +  ui("wake");                                                      
+      624 +  hintEl.textContent = 'SAY "JARVIS" TO ACTIVATE';                 
+      625 +  listen();                                                        
+      626 +}                                                                  
+      627 +                                                                   
+      628 +// ═══════════════════════════════════════════════                 
+      629 +//  START / STOP                                                   
+      630 +// ═══════════════════════════════════════════════                 
+      631 +function startJarvis() {                                           
+      632 +  if (!SpeechRec) {                                                
+      633 +    warn("⚠ Web Speech API not available. Use Chrome or Edge.", 0);
+      634 +    return;                                                        
+      635 +  }                                                                
+      636 +  state = State.WAKE;                                              
+      637 +  ui("wake");                                                      
+      638 +  hintEl.textContent = 'SAY "JARVIS" TO ACTIVATE';                 
+      639 +  speak("J.A.R.V.I.S. online. Awaiting your command, master.", () =
+          +> listen());                                                       
+      640 +}                                                                  
+      641 +                                                                   
+      642 +function stopJarvis() {                                            
+      643 +  state = State.IDLE;                                              
+      644 +  speaking = false;                                                
+      645 +  killRec();                                                       
+      646 +  synth.cancel();                                                  
+      647 +  ui("idle");                                                      
+      648 +  hintEl.textContent = "CLICK REACTOR TO ACTIVATE";                
+      649 +  dbg("idle");                                                     
+      650 +}                                                                  
+      651 +                                                                   
+      652 +// ═══════════════════════════════════════════════                 
+      653 +//  REACTOR CLICK                                                  
+      654 +// ═══════════════════════════════════════════════                 
+      655 +$("reactor").addEventListener("click", () => {                     
+      656 +  if (state !== State.IDLE) {                                      
+      657 +    stopJarvis();                                                  
+      658 +    setAction("Jarvis deactivated.");                              
+      659 +  } else {                                                         
+      660 +    startJarvis();                                                 
+      661 +  }                                                                
+      662 +});                                                   
 
                                                    
                                                    
