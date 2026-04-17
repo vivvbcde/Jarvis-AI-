@@ -1,18 +1,16 @@
-                                                                                     
-  <!DOCTYPE html>                                           
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+ <!DOCTYPE html>                                                                    
+  <html lang="en">                                                                   
+  <head>                                                                             
+    <meta charset="UTF-8" />                                                         
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />         
-    <title>J.A.R.V.I.S</title>
+    <title>J.A.R.V.I.S</title>                              
     <style>                                                                          
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                                                                                      
-      :root {
-        --blue:      #00d4ff;                                                        
+      :root {                                               
+        --blue:      #00d4ff;
         --blue-dim:  #0090b8;                                                        
-        --blue-dark: #003a4d;
-        --glow:      0 0 12px #00d4ff, 0 0 30px #00d4ff88, 0 0 60px #00d4ff44;       
+        --blue-dark: #003a4d;                                                        
         --glow-soft: 0 0 8px #00d4ff66;                                              
         --bg:        #010b12;                                                        
         --panel:     #020f18cc;                                                      
@@ -20,406 +18,336 @@
         --text-dim:  #4a8ea0;                                                        
       }                                                                              
                                                                                      
-      html, body {                                          
-        height: 100%;
-        background: var(--bg);
-        font-family: 'Courier New', monospace;                                       
-        color: var(--text);
-        overflow: hidden;                                                            
-      }                                                     
-
-      /* scanlines */                                                                
-      body::before {
-        content: '';                                                                 
-        position: fixed; inset: 0; z-index: 999; pointer-events: none;
-        background: repeating-linear-gradient(                                       
-          to bottom,
-          transparent 0px, transparent 3px,                                          
-          rgba(0,212,255,0.02) 3px, rgba(0,212,255,0.02) 4px                         
-        );                                                                           
-      }                                                                              
+      html, body { height: 100%; background: var(--bg); font-family: 'Courier New',  
+  monospace; color: var(--text); overflow: hidden; }        
                                                                                      
-      .shell {                                              
-        display: grid;
-        grid-template-rows: 56px 1fr 60px;
-        grid-template-columns: 220px 1fr 220px;                                      
-        height: 100vh;
-      }                                                                              
-                                                            
-      /* ── Top bar ── */                                                            
-      .topbar {
-        grid-column: 1 / -1;                                                         
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0 28px;                                                             
-        border-bottom: 1px solid #00d4ff22;
-        background: var(--panel);                                                    
-      }                                                     
-      .topbar-logo {                                                                 
-        font-size: 13px; letter-spacing: 8px; font-weight: bold;
-        color: var(--blue); text-shadow: var(--glow-soft);                           
-      }                                                                              
+      body::before {                                        
+        content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none;
+        background: repeating-linear-gradient(to bottom, transparent 0px, transparent
+   3px, rgba(0,212,255,0.02) 3px, rgba(0,212,255,0.02) 4px);                         
+      }
+                                                                                     
+      .shell { display: grid; grid-template-rows: 56px 1fr 60px;                     
+  grid-template-columns: 220px 1fr 220px; height: 100vh; }
+                                                                                     
+      /* Top bar */                                         
+      .topbar { grid-column: 1 / -1; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 28px; border-bottom: 1px solid          
+  #00d4ff22; background: var(--panel); }
+      .topbar-logo { font-size: 13px; letter-spacing: 8px; font-weight: bold; color: 
+  var(--blue); text-shadow: var(--glow-soft); }                                      
       .topbar-right { font-size: 11px; color: var(--text-dim); letter-spacing: 3px; }
       #clock { color: var(--blue); text-shadow: var(--glow-soft); }                  
                                                                                      
-      /* waveform */                                                                 
       .waveform { display: flex; align-items: center; gap: 3px; height: 24px; }      
-      .waveform .w {                                                                 
-        width: 3px; border-radius: 2px; background: var(--blue);
-        animation: waveani 1.4s ease-in-out infinite;                                
-      }                                                                              
-      .waveform .w:nth-child(1)  { animation-delay: 0.0s; }
-      .waveform .w:nth-child(2)  { animation-delay: 0.1s; }                          
-      .waveform .w:nth-child(3)  { animation-delay: 0.2s; } 
-      .waveform .w:nth-child(4)  { animation-delay: 0.3s; }                          
-      .waveform .w:nth-child(5)  { animation-delay: 0.4s; } 
-      .waveform .w:nth-child(6)  { animation-delay: 0.5s; }                          
-      .waveform .w:nth-child(7)  { animation-delay: 0.6s; } 
-      .waveform .w:nth-child(8)  { animation-delay: 0.7s; }                          
-      .waveform .w:nth-child(9)  { animation-delay: 0.8s; }                          
-      .waveform .w:nth-child(10) { animation-delay: 0.9s; }
-      @keyframes waveani {                                                           
-        0%, 100% { height: 4px; opacity: 0.3; }             
-        50%       { height: 20px; opacity: 1; box-shadow: 0 0 4px var(--blue); }     
-      }                                                                              
-      .waveform.idle .w { animation-play-state: paused; height: 4px; opacity: 0.2; } 
+      .waveform .w { width: 3px; border-radius: 2px; background: var(--blue);        
+  animation: waveani 1.4s ease-in-out infinite; }                                    
+      .waveform .w:nth-child(1){animation-delay:0.0s} .waveform
+  .w:nth-child(2){animation-delay:0.1s}                                              
+      .waveform .w:nth-child(3){animation-delay:0.2s} .waveform
+  .w:nth-child(4){animation-delay:0.3s}                                              
+      .waveform .w:nth-child(5){animation-delay:0.4s} .waveform
+  .w:nth-child(6){animation-delay:0.5s}                                              
+      .waveform .w:nth-child(7){animation-delay:0.6s} .waveform
+  .w:nth-child(8){animation-delay:0.7s}                                              
+      .waveform .w:nth-child(9){animation-delay:0.8s} .waveform
+  .w:nth-child(10){animation-delay:0.9s}                                             
+      @keyframes waveani { 0%,100%{height:4px;opacity:0.3}  
+  50%{height:20px;opacity:1;box-shadow:0 0 4px var(--blue)} }                        
+      .waveform.idle .w { animation-play-state: paused; height: 4px; opacity: 0.2; }
                                                                                      
-      /* ── Sidebars ── */                                  
-      .sidebar {                                                                     
-        padding: 24px 16px;                                 
-        border-right: 1px solid #00d4ff18;                                           
-        background: var(--panel);
-        display: flex; flex-direction: column; gap: 18px;                            
-        overflow: hidden;                                   
-      }                                                                              
+      /* Sidebars */                                        
+      .sidebar { padding: 24px 16px; border-right: 1px solid #00d4ff18; background:  
+  var(--panel); display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
       .sidebar.right { border-right: none; border-left: 1px solid #00d4ff18; }
-                                                                                     
-      .panel-block {                                        
-        border: 1px solid #00d4ff22;                                                 
-        background: #020d17;                                
-        padding: 12px 14px;                                                          
-        border-radius: 4px;
-      }                                                                              
-      .panel-title {                                        
-        font-size: 9px; letter-spacing: 4px; color: var(--text-dim);                 
-        margin-bottom: 10px; text-transform: uppercase;                              
-      }
-      .panel-value { font-size: 12px; color: var(--blue); line-height: 1.8; }        
-                                                                                     
+      .panel-block { border: 1px solid #00d4ff22; background: #020d17; padding: 12px 
+  14px; border-radius: 4px; }                                                        
+      .panel-title { font-size: 9px; letter-spacing: 4px; color: var(--text-dim);
+  margin-bottom: 10px; text-transform: uppercase; }                                  
+      .panel-value { font-size: 12px; color: var(--blue); line-height: 1.8; }
       .status-row { display: flex; align-items: center; gap: 10px; font-size: 11px;  
-  letter-spacing: 2px; }                                                             
-      .status-dot {                                                                  
-        width: 8px; height: 8px; border-radius: 50%;        
-        background: var(--blue); box-shadow: 0 0 6px var(--blue);
-        flex-shrink: 0; transition: background 0.3s;                                 
-      }
+  letter-spacing: 2px; }                                    
+      .status-dot { width: 8px; height: 8px; border-radius: 50%; background:         
+  var(--blue); box-shadow: 0 0 6px var(--blue); flex-shrink: 0; transition:          
+  background 0.3s; }
       .status-dot.warn  { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }        
       .status-dot.error { background: #ff4444; box-shadow: 0 0 6px #ff4444; }        
-      .status-dot.pulse { animation: dotpulse 1s ease-in-out infinite; }             
-      @keyframes dotpulse {                                                          
-        0%,100% { opacity:1; transform:scale(1); }                                   
-        50%      { opacity:0.4; transform:scale(0.6); }     
-      }                                                                              
-                                                            
+      .status-dot.pulse { animation: dotpulse 1s ease-in-out infinite; }
+      @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1)}                    
+  50%{opacity:0.4;transform:scale(0.6)} }                                            
+                                                                                     
       .bars { display: flex; align-items: flex-end; gap: 3px; height: 40px;          
   margin-top: 8px; }                                        
-      .bar {                                                                         
-        flex: 1; background: var(--blue-dark); border-radius: 2px 2px 0 0;
-        animation: barwave 2.4s ease-in-out infinite;                                
-      }
+      .bar { flex: 1; background: var(--blue-dark); border-radius: 2px 2px 0 0;      
+  animation: barwave 2.4s ease-in-out infinite; }                                    
       .bar:nth-child(1){animation-delay:0.0s} .bar:nth-child(2){animation-delay:0.2s}
-      .bar:nth-child(3){animation-delay:0.4s} .bar:nth-child(4){animation-delay:0.6s}
-      .bar:nth-child(5){animation-delay:0.8s} .bar:nth-child(6){animation-delay:1.0s}
-      .bar:nth-child(7){animation-delay:1.2s}                                        
-      @keyframes barwave {                                                           
-        0%,100% { height:6px; background:var(--blue-dark); }
-        50%      { height:34px; background:var(--blue); box-shadow:0 0 6px           
-  var(--blue); }                                                                     
-      }                                                                              
+   .bar:nth-child(3){animation-delay:0.4s}                                           
+      .bar:nth-child(4){animation-delay:0.6s} .bar:nth-child(5){animation-delay:0.8s}
+   .bar:nth-child(6){animation-delay:1.0s} .bar:nth-child(7){animation-delay:1.2s}   
+      @keyframes barwave { 0%,100%{height:6px;background:var(--blue-dark)}
+  50%{height:34px;background:var(--blue);box-shadow:0 0 6px var(--blue)} }           
+                                                            
+      /* Center */                                                                   
+      .center { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 28px; position: relative; overflow: hidden; }        
+      .center::before { content: ''; position: absolute; inset: 0; background:
+  linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px), linear-gradient(90deg,
+   rgba(0,212,255,0.025) 1px, transparent 1px); background-size: 40px 40px; }
                                                                                      
-      /* ── Center ── */                                    
-      .center {
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 28px; position: relative; overflow: hidden;                             
-      }
-      .center::before {                                                              
-        content: '';                                                                 
-        position: absolute; inset: 0;
-        background:                                                                  
-          linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);        
-        background-size: 40px 40px;
-      }                                                                              
-                                                                                     
-      /* ── Arc Reactor ── */
-      .reactor-wrap {                                                                
-        position: relative; width: 240px; height: 240px;    
-        display: flex; align-items: center; justify-content: center;                 
-        z-index: 2;
-      }                                                                              
-      .ring-outer {                                         
-        position: absolute; inset: 0; border-radius: 50%;                            
-        border: 2px solid transparent;
-        border-top-color: var(--blue); border-right-color: var(--blue);              
-        animation: spin 6s linear infinite;                                          
-        box-shadow: 0 0 10px #00d4ff55;
-      }                                                                              
-      .ring-mid {                                           
-        position: absolute; inset: 12px; border-radius: 50%;                         
-        border: 1px solid #00d4ff33; border-bottom-color: var(--blue);               
-        animation: spin 4s linear infinite reverse;                                  
-      }                                                                              
-      .ring-inner {                                                                  
-        position: absolute; inset: 30px; border-radius: 50%;
-        border: 2px dashed #00d4ff22;                                                
-        animation: spin 10s linear infinite;
-      }                                                                              
-      @keyframes spin { to { transform: rotate(360deg); } } 
-                                                                                     
-      .reactor-core {
-        width: 140px; height: 140px; border-radius: 50%;                             
-        background: radial-gradient(circle at 40% 35%,      
-          #b0f0ff 0%, #40cfff 20%, #00a8d6 40%, #003d5c 70%, #001a2e 100%            
-        );                                                                           
-        box-shadow:                                                                  
-          0 0 30px #00d4ffcc, 0 0 70px #00d4ff88,                                    
-          0 0 120px #00d4ff44, inset 0 0 30px #005580;      
-        position: relative;                                                          
-        animation: corepulse 3s ease-in-out infinite;       
-        cursor: pointer;                                                             
-      }                                                     
-      .reactor-core::after {                                                         
-        content: '';                                                                 
-        position: absolute; inset: 18px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.15);                                    
-        box-shadow: inset 0 0 20px rgba(0,180,220,0.4);                              
-      }                                                                              
+      /* Arc Reactor */                                     
+      .reactor-wrap { position: relative; width: 240px; height: 240px; display: flex;
+   align-items: center; justify-content: center; z-index: 2; }                       
+      .ring-outer { position: absolute; inset: 0; border-radius: 50%; border: 2px
+  solid transparent; border-top-color: var(--blue); border-right-color: var(--blue); 
+  animation: spin 6s linear infinite; box-shadow: 0 0 10px #00d4ff55; }
+      .ring-mid   { position: absolute; inset: 12px; border-radius: 50%; border: 1px 
+  solid #00d4ff33; border-bottom-color: var(--blue); animation: spin 4s linear       
+  infinite reverse; }
+      .ring-inner { position: absolute; inset: 30px; border-radius: 50%; border: 2px 
+  dashed #00d4ff22; animation: spin 10s linear infinite; }                           
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .reactor-core { width: 140px; height: 140px; border-radius: 50%; background:   
+  radial-gradient(circle at 40% 35%, #b0f0ff 0%, #40cfff 20%, #00a8d6 40%, #003d5c   
+  70%, #001a2e 100%); box-shadow: 0 0 30px #00d4ffcc, 0 0 70px #00d4ff88, 0 0 120px  
+  #00d4ff44, inset 0 0 30px #005580; position: relative; animation: corepulse 3s     
+  ease-in-out infinite; cursor: pointer; }                  
+      .reactor-core::after { content: ''; position: absolute; inset: 18px;
+  border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); box-shadow: inset 0 0
+   20px rgba(0,180,220,0.4); }
       @keyframes corepulse {                                                         
-        0%,100% {                                                                    
-          box-shadow: 0 0 30px #00d4ffcc, 0 0 70px #00d4ff88,
-            0 0 120px #00d4ff44, inset 0 0 30px #005580;                             
-        }
-        50% {                                                                        
-          box-shadow: 0 0 50px #00d4ffee, 0 0 110px #00d4ffaa,
-            0 0 180px #00d4ff66, inset 0 0 50px #0088cc;                             
-        }                                                                            
-      }                                                                              
-      .reactor-segments {                                                            
-        position: absolute; inset: 40px; border-radius: 50%;
-        background: conic-gradient(                                                  
-          #00d4ff22 0deg, transparent 20deg, transparent 60deg,
-          #00d4ff22 60deg, transparent 80deg, transparent 120deg,                    
-          #00d4ff22 120deg, transparent 140deg, transparent 180deg,
-          #00d4ff22 180deg, transparent 200deg, transparent 240deg,                  
-          #00d4ff22 240deg, transparent 260deg, transparent 300deg,
-          #00d4ff22 300deg, transparent 320deg, transparent 360deg                   
-        );                                                  
-        animation: spin 20s linear infinite reverse;                                 
+        0%,100% { box-shadow: 0 0 30px #00d4ffcc, 0 0 70px #00d4ff88, 0 0 120px
+  #00d4ff44, inset 0 0 30px #005580; }                                               
+        50%      { box-shadow: 0 0 50px #00d4ffee, 0 0 110px #00d4ffaa, 0 0 180px
+  #00d4ff66, inset 0 0 50px #0088cc; }                                               
       }                                                     
-      .reactor-glow {
-        position: absolute; inset: -40px; border-radius: 50%;                        
-        background: radial-gradient(circle, #00d4ff1a 0%, transparent 70%);
-        pointer-events: none; animation: corepulse 3s ease-in-out infinite;          
-      }                                                     
+      .reactor-segments { position: absolute; inset: 40px; border-radius: 50%;       
+  background: conic-gradient(#00d4ff22 0deg, transparent 20deg, transparent 60deg,   
+  #00d4ff22 60deg, transparent 80deg, transparent 120deg, #00d4ff22 120deg,
+  transparent 140deg, transparent 180deg, #00d4ff22 180deg, transparent 200deg,      
+  transparent 240deg, #00d4ff22 240deg, transparent 260deg, transparent 300deg,
+  #00d4ff22 300deg, transparent 320deg, transparent 360deg); animation: spin 20s
+  linear infinite reverse; }
+      .reactor-glow { position: absolute; inset: -40px; border-radius: 50%;
+  background: radial-gradient(circle, #00d4ff1a 0%, transparent 70%); pointer-events:
+   none; animation: corepulse 3s ease-in-out infinite; }
                                                                                      
-      /* mic hint */                                                                 
-      .mic-hint {
-        font-size: 9px; letter-spacing: 3px; color: var(--text-dim);                 
-        margin-top: -16px; z-index: 2;                      
-      }                                                                              
-  
-      /* ── Status badge ── */                                                       
-      .status-label { z-index: 2; text-align: center; }     
-      .badge {                                                                       
-        display: inline-block;
-        font-size: 11px; letter-spacing: 4px;                                        
-        padding: 6px 20px;                                  
-        border: 1px solid var(--blue);                                               
-        color: var(--blue); text-shadow: var(--glow-soft);  
-        box-shadow: var(--glow-soft);                                                
-        text-transform: uppercase;                                                   
-        transition: all 0.4s ease;
-        background: #00d4ff08;                                                       
-      }                                                                              
-  
-      /* ── Command feed ── */                                                       
+      .mic-hint { font-size: 9px; letter-spacing: 3px; color: var(--text-dim);       
+  margin-top: -16px; z-index: 2; }
+      .status-label { z-index: 2; text-align: center; }                              
+      .badge { display: inline-block; font-size: 11px; letter-spacing: 4px; padding: 
+  6px 20px; border: 1px solid var(--blue); color: var(--blue); text-shadow:          
+  var(--glow-soft); box-shadow: var(--glow-soft); text-transform: uppercase;         
+  transition: all 0.4s ease; background: #00d4ff08; }                                
       .command-feed { z-index: 2; text-align: center; max-width: 500px; padding: 0
   16px; }                                                                            
       .feed-label { font-size: 9px; letter-spacing: 4px; color: var(--text-dim);
   margin-bottom: 8px; }                                                              
-      #last-command {                                       
-        font-size: 15px; color: var(--text); letter-spacing: 2px;                    
-        min-height: 22px; transition: all 0.3s;
-        text-shadow: 0 0 8px rgba(0,212,255,0.4);                                    
-      }                                                                              
-      #last-action { font-size: 11px; color: var(--blue-dim); letter-spacing: 1px;   
+      #last-command { font-size: 15px; color: var(--text); letter-spacing: 2px;
+  min-height: 22px; transition: all 0.3s; text-shadow: 0 0 8px rgba(0,212,255,0.4); }
+      #last-action { font-size: 11px; color: var(--blue-dim); letter-spacing: 1px;
   margin-top: 6px; min-height: 18px; }                                               
                                                             
-      /* ── Bottom bar ── */                                                         
-      .bottombar {                                          
-        grid-column: 1 / -1;
-        display: flex; align-items: center; justify-content: space-between;          
-        padding: 0 28px;
-        border-top: 1px solid #00d4ff22;                                             
-        background: var(--panel);                           
-      }
-      .bottom-item { font-size: 10px; letter-spacing: 3px; color: var(--text-dim); }
-      .bottom-item span { color: var(--blue); }                                      
+      /* Bottom bar */                                                               
+      .bottombar { grid-column: 1 / -1; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 28px; border-top: 1px solid #00d4ff22;  
+  background: var(--panel); }
+      .bottom-item { font-size: 10px; letter-spacing: 3px; color: var(--text-dim); } 
+      .bottom-item span { color: var(--blue); }             
                                                                                      
-      /* ── Log ── */                                                                
-      #log {                                                                         
-        font-size: 10px; line-height: 2;                    
-        max-height: 180px; overflow-y: auto;                                         
-        color: var(--text-dim);
-      }                                                                              
-      #log::-webkit-scrollbar { width: 4px; }               
-      #log::-webkit-scrollbar-track { background: transparent; }                     
-      #log::-webkit-scrollbar-thumb { background: var(--blue-dark); border-radius:
+      /* Log */
+      #log { font-size: 10px; line-height: 2; max-height: 180px; overflow-y: auto;   
+  color: var(--text-dim); }                                                          
+      #log::-webkit-scrollbar { width: 4px; }
+      #log::-webkit-scrollbar-thumb { background: var(--blue-dark); border-radius:   
   2px; }                                                                             
-  
-      @keyframes flashin {                                                           
-        from { opacity: 0; transform: translateY(5px); }    
-        to   { opacity: 1; transform: translateY(0); }                               
-      }                                                     
-      .flash { animation: flashin 0.3s ease forwards; }
                                                                                      
-      /* not-supported banner */
-      #browser-warn {                                                                
-        display: none;                                      
-        position: fixed; top: 70px; left: 50%; transform: translateX(-50%);          
-        background: #1a0a00; border: 1px solid #ff6600;
-        color: #ff9944; font-size: 11px; letter-spacing: 2px;                        
-        padding: 8px 20px; border-radius: 2px; z-index: 1000;                        
+      /* Popup-blocked open button */                                                
+      #open-btn-wrap {                                      
+        display: none; position: fixed; bottom: 80px; left: 50%; transform:          
+  translateX(-50%);                                                                  
+        z-index: 1000; animation: flashin 0.3s ease;                                 
       }                                                                              
+      #open-btn {                                           
+        display: block; padding: 14px 36px;                                          
+        background: #00d4ff12; border: 1px solid var(--blue);
+        color: var(--blue); font-family: 'Courier New', monospace;                   
+        font-size: 12px; letter-spacing: 4px; cursor: pointer;
+        box-shadow: 0 0 20px #00d4ff44; text-decoration: none;                       
+        text-transform: uppercase; transition: background 0.2s;                      
+      }                                                                              
+      #open-btn:hover { background: #00d4ff22; }                                     
+                                                            
+      /* Browser warning */                                                          
+      #browser-warn { display: none; position: fixed; top: 70px; left: 50%;
+  transform: translateX(-50%); background: #1a0a00; border: 1px solid #ff6600; color:
+   #ff9944; font-size: 11px; letter-spacing: 2px; padding: 8px 20px; border-radius:
+  2px; z-index: 1000; }                                                              
+                                                            
+      @keyframes flashin { from{opacity:0;transform:translateX(-50%) translateY(8px)}
+   to{opacity:1;transform:translateX(-50%) translateY(0)} }
+      .flash { animation: flashin2 0.3s ease forwards; }                             
+      @keyframes flashin2 { from{opacity:0;transform:translateY(5px)}                
+  to{opacity:1;transform:translateY(0)} }                                            
     </style>                                                                         
   </head>                                                                            
   <body>                                                    
 
-  <div id="browser-warn">⚠ MICROPHONE NOT SUPPORTED — USE CHROME OR EDGE</div>       
-  
+  <div id="browser-warn">⚠ USE CHROME OR EDGE — SAFARI / FIREFOX DON'T SUPPORT WEB   
+  SPEECH API</div>
+                                                                                     
+  <!-- Popup-blocked fallback button -->                    
+  <div id="open-btn-wrap">
+    <a id="open-btn" href="#" target="_blank" rel="noopener">TAP TO OPEN</a>         
+  </div>                                                                             
+                                                                                     
   <div class="shell">                                                                
-                                                            
-    <header class="topbar">                                                          
-      <div class="topbar-logo">J.A.R.V.I.S</div>            
+    <header class="topbar">                                 
+      <div class="topbar-logo">J.A.R.V.I.S</div>
       <div class="waveform idle" id="waveform">
-        <div class="w"></div><div class="w"></div><div class="w"></div>              
-        <div class="w"></div><div class="w"></div><div class="w"></div>
-        <div class="w"></div><div class="w"></div><div class="w"></div>              
-        <div class="w"></div>                                                        
-      </div>
-      <div class="topbar-right"><span id="clock">00:00:00</span> &nbsp;|&nbsp;       
+        <div class="w"></div><div class="w"></div><div class="w"></div><div          
+  class="w"></div><div class="w"></div>                                              
+        <div class="w"></div><div class="w"></div><div class="w"></div><div          
+  class="w"></div><div class="w"></div>                                              
+      </div>                                                
+      <div class="topbar-right"><span id="clock">00:00:00</span> &nbsp;|&nbsp;
   ONLINE</div>                                                                       
     </header>
                                                                                      
     <aside class="sidebar">                                 
       <div class="panel-block">
-        <div class="panel-title">System Status</div>                                 
-        <div class="status-row">
-          <div class="status-dot" id="status-dot"></div>                             
+        <div class="panel-title">System Status</div>
+        <div class="status-row">                                                     
+          <div class="status-dot" id="status-dot"></div>
           <div class="panel-value" id="status-text">IDLE</div>                       
-        </div>
-      </div>                                                                         
+        </div>                                                                       
+      </div>
       <div class="panel-block">                                                      
-        <div class="panel-title">Audio Input</div>
+        <div class="panel-title">Audio Input</div>          
         <div class="bars">                                                           
           <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div>      
-          <div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div  
+  class="bar"></div>                                        
         </div>                                                                       
       </div>                                                
-      <div class="panel-block">                                                      
+      <div class="panel-block">
         <div class="panel-title">Wake Phrase</div>
         <div class="panel-value">"JARVIS"</div>                                      
-      </div>                                                
+      </div>
       <div class="panel-block">                                                      
-        <div class="panel-title">Mode</div>
+        <div class="panel-title">Mode</div>                 
         <div class="panel-value" id="mode-text"                                      
   style="color:var(--text-dim)">STANDBY</div>                                        
-      </div>
+      </div>                                                                         
     </aside>                                                                         
                                                             
     <main class="center">
-      <div class="reactor-wrap" id="reactor" title="Click to start / stop listening">
+      <div class="reactor-wrap" id="reactor" title="Click to activate / deactivate">
         <div class="reactor-glow"></div>                                             
-        <div class="ring-outer"></div>                                               
+        <div class="ring-outer"></div>
         <div class="ring-mid"></div>                                                 
-        <div class="ring-inner"></div>                                               
-        <div class="reactor-segments"></div>                
-        <div class="reactor-core"></div>
-      </div>                                                                         
-  
-      <div class="mic-hint" id="mic-hint">CLICK REACTOR TO ACTIVATE</div>            
-                                                            
-      <div class="status-label">                                                     
-        <div class="badge" id="status-badge">IDLE</div>     
-      </div>                                                                         
-  
-      <div class="command-feed">                                                     
-        <div class="feed-label">LAST COMMAND</div>          
-        <div id="last-command">—</div>
-        <div id="last-action">Click the reactor to begin.</div>                      
+        <div class="ring-inner"></div>                      
+        <div class="reactor-segments"></div>                                         
+        <div class="reactor-core"></div>                    
       </div>
-    </main>                                                                          
-                                                            
-    <aside class="sidebar right">                                                    
-      <div class="panel-block">                             
-        <div class="panel-title">Command Log</div>
-        <div id="log">—</div>
-      </div>                                                                         
-      <div class="panel-block">
-        <div class="panel-title">Quick Reference</div>                               
-        <div class="panel-value"                            
-  style="font-size:10px;line-height:2;color:var(--text-dim);">                       
-          open youtube<br>
-          open gmail<br>                                                             
-          open chatgpt<br>                                  
-          open netflix<br>
-          open github<br>
-          what time is it<br>                                                        
-          what's the date<br>
-          quit jarvis                                                                
-        </div>                                              
-      </div>
-    </aside>
                                                                                      
+      <div class="mic-hint" id="mic-hint">CLICK REACTOR TO ACTIVATE</div>
+                                                                                     
+      <div class="status-label">                                                     
+        <div class="badge" id="status-badge">IDLE</div>
+      </div>                                                                         
+                                                            
+      <div class="command-feed">
+        <div class="feed-label">LAST COMMAND</div>
+        <div id="last-command">—</div>                                               
+        <div id="last-action">Click the reactor to begin.</div>
+      </div>                                                                         
+    </main>                                                 
+                                                                                     
+    <aside class="sidebar right">                           
+      <div class="panel-block">
+        <div class="panel-title">Command Log</div>
+        <div id="log">—</div>                                                        
+      </div>
+      <div class="panel-block">                                                      
+        <div class="panel-title">Quick Reference</div>      
+        <div class="panel-value"                                                     
+  style="font-size:10px;line-height:2;color:var(--text-dim);">                       
+          open youtube<br>open gmail<br>open chatgpt<br>open netflix<br>             
+          open github<br>open [any site]<br>what time is it<br>quit jarvis           
+        </div>                                                                       
+      </div>                                                                         
+    </aside>                                                                         
+                                                            
     <footer class="bottombar">
-      <div class="bottom-item">STARK INDUSTRIES &nbsp; v1.0</div>                    
+      <div class="bottom-item">STARK INDUSTRIES &nbsp; v1.0</div>
       <div class="bottom-item">CORE POWER &nbsp;<span>ARC REACTOR</span></div>       
       <div class="bottom-item">SYSTEM &nbsp;<span>NOMINAL</span></div>               
     </footer>                                                                        
-                                                                                     
-  </div>                                                    
+  </div>                                                                             
                                                                                      
   <script>                                                  
-  // ── Config — edit these freely ──
+  // ─────────────────────────────────────────────
+  //  CONFIG — add any site here                                                     
+  // ─────────────────────────────────────────────
   const WAKE_PHRASE = "jarvis";                                                      
-  
+                                                            
   const WEBSITES = {                                                                 
-    "youtube":     "https://youtube.com",                   
-    "gmail":       "https://mail.google.com",                                        
-    "google":      "https://google.com",
-    "chatgpt":     "https://chat.openai.com",                                        
-    "netflix":     "https://netflix.com",                   
-    "spotify":     "https://open.spotify.com",                                       
-    "spotify web": "https://open.spotify.com",              
-    "github":      "https://github.com",                                             
-    "twitter":     "https://twitter.com",
-    "reddit":      "https://reddit.com",                                             
-    "linkedin":    "https://linkedin.com",                                           
-    "amazon":      "https://amazon.com",
-    "instagram":   "https://instagram.com",                                          
-    "news":        "https://news.ycombinator.com",          
-    "claude":      "https://claude.ai",                                              
-  };
+    "youtube":        "https://youtube.com",                
+    "gmail":          "https://mail.google.com",                                     
+    "google":         "https://google.com",
+    "chatgpt":        "https://chat.openai.com",                                     
+    "chat gpt":       "https://chat.openai.com",            
+    "netflix":        "https://netflix.com",                                         
+    "spotify":        "https://open.spotify.com",           
+    "spotify web":    "https://open.spotify.com",                                    
+    "github":         "https://github.com",
+    "twitter":        "https://twitter.com",                                         
+    "x":              "https://twitter.com",                                         
+    "reddit":         "https://reddit.com",
+    "linkedin":       "https://linkedin.com",                                        
+    "amazon":         "https://amazon.com",                 
+    "instagram":      "https://instagram.com",                                       
+    "facebook":       "https://facebook.com",
+    "whatsapp":       "https://web.whatsapp.com",                                    
+    "notion":         "https://notion.so",                                           
+    "figma":          "https://figma.com",
+    "claude":         "https://claude.ai",                                           
+    "vercel":         "https://vercel.com",                 
+    "news":           "https://news.ycombinator.com",                                
+    "hacker news":    "https://news.ycombinator.com",
+    "wikipedia":      "https://wikipedia.org",                                       
+    "maps":           "https://maps.google.com",                                     
+    "google maps":    "https://maps.google.com",
+    "drive":          "https://drive.google.com",                                    
+    "google drive":   "https://drive.google.com",           
+    "calendar":       "https://calendar.google.com",                                 
+    "google calendar":"https://calendar.google.com",
+    "docs":           "https://docs.google.com",                                     
+    "google docs":    "https://docs.google.com",                                     
+    "sheets":         "https://sheets.google.com",
+    "slides":         "https://slides.google.com",                                   
+    "meet":           "https://meet.google.com",            
+    "zoom":           "https://zoom.us",                                             
+    "twitch":         "https://twitch.tv",
+    "discord":        "https://discord.com/app",                                     
+    "slack":          "https://app.slack.com",              
+    "pinterest":      "https://pinterest.com",                                       
+    "tiktok":         "https://tiktok.com",
+    "stackoverflow":  "https://stackoverflow.com",                                   
+    "stack overflow": "https://stackoverflow.com",                                   
+    "medium":         "https://medium.com",
+    "paypal":         "https://paypal.com",                                          
+    "stripe":         "https://stripe.com",                 
+  };                                                                                 
+   
+  // Known desktop apps — friendly message since browser can't launch them           
+  const DESKTOP_APPS = ["terminal","finder","safari","chrome","vscode","vs 
+  code","xcode","calculator","notes","messages","mail","music","photos","keynote","pa
+  ges","numbers","activity monitor"];                       
                                                                                      
-  // Apps: shown as friendly message since browser can't open desktop apps           
-  const KNOWN_APPS = [
-    "chrome","safari","terminal","finder","notes","discord",                         
-    "vscode","vs code","code","slack","zoom","spotify","mail",
-    "messages","calculator","xcode","music","photos"                                 
-  ];                                                                                 
-                                                                                     
-  // ── DOM refs ──                                                                  
+  // ─────────────────────────────────────────────          
+  //  DOM
+  // ─────────────────────────────────────────────
   const statusDot   = document.getElementById("status-dot");
   const statusText  = document.getElementById("status-text");                        
   const statusBadge = document.getElementById("status-badge");
@@ -428,255 +356,375 @@
   const lastCmd     = document.getElementById("last-command");                       
   const lastAction  = document.getElementById("last-action");
   const logEl       = document.getElementById("log");                                
-  const micHint     = document.getElementById("mic-hint");                           
-  const reactor     = document.getElementById("reactor");
-                                                                                     
-  // ── State ──                                            
-  let recognition  = null;
-  let listening    = false;                                                          
-  let awaitingCmd  = false;
-  let synth        = window.speechSynthesis;                                         
-                                                                                     
-  // ── Clock ──
-  function tick() {                                                                  
-    document.getElementById("clock").textContent =          
+  const micHint     = document.getElementById("mic-hint");
+  const reactor     = document.getElementById("reactor");                            
+  const openBtnWrap = document.getElementById("open-btn-wrap");
+  const openBtn     = document.getElementById("open-btn");                           
+   
+  // ─────────────────────────────────────────────                                   
+  //  State                                                 
+  // ─────────────────────────────────────────────
+  let recognition  = null;                                                           
+  let listening    = false;
+  let awaitingCmd  = false;                                                          
+  let isSpeaking   = false;                                 
+  const synth      = window.speechSynthesis;                                         
+   
+  // ─────────────────────────────────────────────                                   
+  //  Clock                                                 
+  // ─────────────────────────────────────────────                                   
+  function tick() {                                         
+    document.getElementById("clock").textContent =
       new Date().toLocaleTimeString("en-US", { hour12: false });
   }                                                                                  
   setInterval(tick, 1000);
   tick();                                                                            
                                                             
-  // ── Status ──
-  const STATUS = {
-    idle:    { label: "IDLE",          badge: "IDLE",       dot: "",      mode:
-  "STANDBY"  },                                                                      
-    wake:    { label: "LISTENING",     badge: "LISTENING",  dot: "pulse", mode: "WAKE
-   WORD" },                                                                          
-    cmd:     { label: "AWAITING CMD",  badge: "CAPTURING",  dot: "pulse", mode:
-  "COMMAND"  },                                                                      
-    exec:    { label: "EXECUTING",     badge: "EXECUTING",  dot: "warn",  mode:
-  "EXECUTE"  },                                                                      
-    speak:   { label: "SPEAKING",      badge: "SPEAKING",   dot: "pulse", mode:
-  "OUTPUT"   },                                                                      
-    error:   { label: "ERROR",         badge: "ERROR",      dot: "error", mode:
-  "ERROR"    },                                                                      
+  // ─────────────────────────────────────────────
+  //  Status helpers
+  // ─────────────────────────────────────────────                                   
+  const STATUS_MAP = {
+    idle:  { label:"IDLE",          badge:"IDLE",       dot:"",      mode:"STANDBY"  
+   },                                                                                
+    wake:  { label:"LISTENING",     badge:"LISTENING",  dot:"pulse", mode:"WAKE WORD"
+   },                                                                                
+    cmd:   { label:"AWAITING CMD",  badge:"CAPTURING",  dot:"pulse", mode:"COMMAND"
+   },                                                                                
+    exec:  { label:"EXECUTING",     badge:"EXECUTING",  dot:"warn",  mode:"EXECUTE"
+   },                                                                                
+    speak: { label:"SPEAKING",      badge:"SPEAKING",   dot:"pulse", mode:"OUTPUT"
+   },                                                                                
+    error: { label:"ERROR",         badge:"ERROR",      dot:"error", mode:"ERROR"
+   },                                                                                
   };                                                        
-                                                                                     
-  function setStatus(key) {                                 
-    const s = STATUS[key] || STATUS.idle;
-    statusDot.className = "status-dot " + s.dot;
-    statusText.textContent = s.label;                                                
-    statusBadge.textContent = s.badge;
-    modeText.textContent = s.mode;                                                   
-    const active = key === "wake" || key === "cmd";                                  
-    waveform.classList.toggle("idle", !active);
+
+  function setStatus(key) {                                                          
+    const s = STATUS_MAP[key] || STATUS_MAP.idle;
+    statusDot.className = "status-dot " + s.dot;                                     
+    statusText.textContent = s.label;                       
+    statusBadge.textContent = s.badge;                                               
+    modeText.textContent = s.mode;
+    waveform.classList.toggle("idle", key !== "wake" && key !== "cmd");              
   }                                                                                  
-                                                            
+   
   function logEntry(text, isError = false) {                                         
-    if (logEl.textContent === "—") logEl.textContent = "";
+    if (logEl.textContent === "—") logEl.textContent = "";  
     const line = document.createElement("div");                                      
-    line.textContent = "> " + text;                                                  
+    line.textContent = "> " + text;                         
     line.style.color = isError ? "#ff5555" : "var(--blue)";                          
     line.classList.add("flash");                                                     
-    logEl.appendChild(line);                                
+    logEl.appendChild(line);                                                         
     logEl.scrollTop = logEl.scrollHeight;                                            
-    while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
+    while (logEl.children.length > 25) logEl.removeChild(logEl.firstChild);          
   }                                                                                  
-  
-  function setAction(text, isError = false) {                                        
-    lastAction.textContent = text;                          
-    logEntry(text, isError);                                                         
-  }                                                         
-
+   
   function setTranscript(text) {                                                     
-    lastCmd.textContent = text;
-    lastCmd.classList.remove("flash");                                               
-    void lastCmd.offsetWidth;                               
+    lastCmd.textContent = text;                             
+    lastCmd.classList.remove("flash");
+    void lastCmd.offsetWidth;                                                        
     lastCmd.classList.add("flash");
   }                                                                                  
-  
-  // ── TTS ──                                                                       
+                                                                                     
+  function setAction(text, isError = false) {
+    lastAction.textContent = text;                                                   
+    logEntry(text, isError);                                
+  }
+
+  // ─────────────────────────────────────────────                                   
+  //  TTS — pauses mic while speaking to prevent self-hearing
+  // ─────────────────────────────────────────────                                   
   function speak(text, onDone) {                            
     if (!synth) { onDone && onDone(); return; }                                      
-    synth.cancel();
-    const utt = new SpeechSynthesisUtterance(text);                                  
-    utt.rate = 1.05;                                                                 
-    utt.pitch = 0.9;
-    utt.onend = () => { onDone && onDone(); };                                       
+    synth.cancel();                                                                  
+    isSpeaking = true;
     setStatus("speak");                                                              
+                                                                                     
+    // Pause mic so Jarvis doesn't hear itself
+    if (recognition && listening) {                                                  
+      try { recognition.stop(); } catch(_) {}               
+    }                                                                                
+   
+    const utt = new SpeechSynthesisUtterance(text);                                  
+    utt.rate  = 1.0;                                        
+    utt.pitch = 0.85;                                                                
+    utt.volume = 1.0;
+                                                                                     
+    // Pick a good voice if available                                                
+    const voices = synth.getVoices();
+    const preferred = voices.find(v =>                                               
+      v.name.includes("Google UK English Male") ||                                   
+      v.name.includes("Daniel") ||
+      v.name.includes("Alex") ||                                                     
+      v.name.includes("Google US English")                  
+    );                                                                               
+    if (preferred) utt.voice = preferred;                   
+
+    utt.onend = () => {                                                              
+      isSpeaking = false;
+      // Resume mic                                                                  
+      if (listening) {                                      
+        setTimeout(() => {
+          try { recognition.start(); } catch(_) {}
+        }, 350);
+      }                                                                              
+      onDone && onDone();
+    };                                                                               
+                                                            
+    utt.onerror = () => {
+      isSpeaking = false;
+      if (listening) setTimeout(() => { try { recognition.start(); } catch(_) {} },
+  350);                                                                              
+      onDone && onDone();
+    };                                                                               
+                                                            
     synth.speak(utt);
+  }
+
+  // Voices load async in some browsers                                              
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
+                                                                                     
+  // ─────────────────────────────────────────────          
+  //  URL resolver — handles ANY website                                             
+  // ─────────────────────────────────────────────          
+  function resolveURL(target) {                                                      
+    const t = target.toLowerCase().trim();
+                                                                                     
+    // 1. Exact match in config                                                      
+    if (WEBSITES[t]) return WEBSITES[t];
+                                                                                     
+    // 2. Partial match (e.g. "youtube videos" → youtube.com)                        
+    for (const [k, v] of Object.entries(WEBSITES)) {
+      if (t.includes(k) || k.includes(t)) return v;                                  
+    }                                                       
+
+    // 3. Looks like a domain (e.g. "espn.com", "bbc.co.uk")                         
+    if (/^[\w-]+\.[a-z]{2,}/.test(t) && !t.includes(" ")) {
+      return t.startsWith("http") ? t : "https://" + t;                              
+    }                                                                                
+                                                                                     
+    // 4. Single word — try adding .com (e.g. "espn" → espn.com)                     
+    if (!t.includes(" ") && t.length > 2) {                 
+      return "https://" + t + ".com";                                                
+    }                                                       
+                                                                                     
+    // 5. Multi-word fallback — Google search               
+    return "https://www.google.com/search?q=" + encodeURIComponent(t);
+  }                                                                                  
+   
+  function isDesktopApp(target) {                                                    
+    const t = target.toLowerCase();                         
+    return DESKTOP_APPS.some(a => t.includes(a) || a.includes(t));                   
+  }                                                         
+
+  // ─────────────────────────────────────────────                                   
+  //  Open URL with popup-blocker fallback
+  // ─────────────────────────────────────────────                                   
+  let openBtnTimer = null;                                                           
+   
+  function openURL(url, label) {                                                     
+    const win = window.open(url, "_blank", "noopener");     
+    if (!win || win.closed || typeof win.closed === "undefined") {                   
+      // Popup blocked — show fallback button                                        
+      openBtn.textContent = "TAP TO OPEN " + label.toUpperCase();                    
+      openBtn.href = url;                                                            
+      openBtnWrap.style.display = "block";                                           
+      clearTimeout(openBtnTimer);                           
+      openBtnTimer = setTimeout(() => { openBtnWrap.style.display = "none"; },       
+  12000);                                                                            
+    }
   }                                                                                  
                                                             
-  // ── Command parser ──                                                            
-  function resolveWebsite(target) {
-    const t = target.toLowerCase().trim();                                           
-    if (WEBSITES[t]) return WEBSITES[t];                    
-    for (const [k, v] of Object.entries(WEBSITES)) {                                 
-      if (t.includes(k) || k.includes(t)) return v;
-    }                                                                                
-    // raw domain?                                          
-    if (t.includes(".") && !t.includes(" ")) {                                       
-      return t.startsWith("http") ? t : "https://" + t;                              
-    }
-    return null;                                                                     
-  }                                                         
-
-  function isKnownApp(target) {                                                      
-    const t = target.toLowerCase();
-    return KNOWN_APPS.some(a => t.includes(a) || a.includes(t));                     
-  }                                                         
-
-  function handleCommand(cmd) {
+  openBtn.addEventListener("click", () => {
+    openBtnWrap.style.display = "none";
+  });                                                                                
+   
+  // ─────────────────────────────────────────────                                   
+  //  Command handler                                       
+  // ─────────────────────────────────────────────
+  function handleCommand(cmd) {                                                      
     const c = cmd.toLowerCase().trim();
     setTranscript(cmd);                                                              
-    setStatus("exec");
-                                                                                     
-    // quit                                                 
-    if (/\b(quit|exit|goodbye|bye|shut down|shutdown|stop)\b/.test(c)) {             
-      speak("Goodbye. Going offline.", () => {                                       
-        stopListening();
-        setStatus("idle");                                                           
-        setAction("Jarvis offline.");                       
+    setStatus("exec");                                                               
+   
+    // Quit                                                                          
+    if (/\b(quit|exit|goodbye|bye|shut down|shutdown|stop jarvis)\b/.test(c)) {
+      speak("Goodbye, master. Going offline.", () => {                               
+        stopListening();                                                             
+        setAction("Jarvis offline.");                                                
         micHint.textContent = "CLICK REACTOR TO ACTIVATE";                           
-      });                                                                            
-      return;
-    }                                                                                
-                                                            
-    // time
-    if (/\btime\b/.test(c) && !/\bdate\b/.test(c)) {
-      const t = new Date().toLocaleTimeString("en-US", { hour:"numeric",             
-  minute:"2-digit" });
-      const msg = "The current time is " + t;                                        
-      setAction(msg);                                                                
-      speak(msg, () => setStatus("wake"));                                           
+      });                                                   
       return;                                                                        
-    }                                                                                
-                                                            
-    // date
-    if (/\b(date|today|day is it)\b/.test(c)) {
-      const d = new Date().toLocaleDateString("en-US", { weekday:"long",             
-  year:"numeric", month:"long", day:"numeric" });                                    
-      const msg = "Today is " + d;                                                   
+    }                                                       
+
+    // Time
+    if (/\btime\b/.test(c) && !/\bdate\b/.test(c)) {
+      const t = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute:    
+  "2-digit" });                                                                      
+      const msg = "Yes master. The current time is " + t + ".";                      
       setAction(msg);                                                                
       speak(msg, () => setStatus("wake"));                  
       return;                                                                        
-    }
+    }                                                       
                                                                                      
-    // open                                                 
-    const openMatch = c.match(/^(?:open|go to|navigate to|launch|show me|take me 
-  to)\s+(.+)$/);                                                                     
-    if (openMatch) {
-      const target = openMatch[1].trim();                                            
-                                                                                     
-      // website check first
-      const url = resolveWebsite(target);                                            
-      if (url) {                                            
-        window.open(url, "_blank");
-        const msg = "Opening " + target + ".";                                       
-        setAction(msg);
-        speak(msg, () => setStatus("wake"));                                         
-        return;                                             
-      }
-
-      // known app — explain limitation                                              
-      if (isKnownApp(target)) {
-        const msg = "I can't open desktop apps from the browser. For app control, run
-   the local Python version.";                                                       
-        setAction(msg, true);
-        speak(msg, () => setStatus("wake"));                                         
-        return;                                             
-      }
-
-      // unknown                                                                     
-      const msg = "I don't recognise '" + target + "'. Add it to the WEBSITES 
-  config.";                                                                          
-      setAction(msg, true);                                 
-      speak(msg, () => setStatus("wake"));                                           
+    // Date                                                 
+    if (/\b(date|today|day is it|what day)\b/.test(c)) {
+      const d = new Date().toLocaleDateString("en-US", { weekday:"long",             
+  year:"numeric", month:"long", day:"numeric" });                                    
+      const msg = "Yes master. Today is " + d + ".";                                 
+      setAction(msg);                                                                
+      speak(msg, () => setStatus("wake"));                  
       return;
     }                                                                                
+   
+    // Open / navigate                                                               
+    const openMatch = c.match(/^(?:open|go to|navigate to|launch|show me|take me 
+  to|load)\s+(.+)$/);                                                                
+    if (openMatch) {
+      const target = openMatch[1].trim();                                            
                                                             
-    // fallback
-    const msg = "I didn't catch that. Please try again.";
-    setAction(msg, true);                                                            
-    speak(msg, () => setStatus("wake"));
-  }                                                                                  
-                                                            
-  // ── Speech recognition ──
-  function buildRecognition() {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;    
-    if (!SpeechRec) {
-      document.getElementById("browser-warn").style.display = "block";               
-      return null;                                          
-    }                                                                                
-    const r = new SpeechRec();                              
-    r.continuous = true;                                                             
-    r.interimResults = false;
-    r.lang = "en-US";                                                                
-                                                            
-    r.onresult = (e) => {
-      const transcript = e.results[e.results.length -
-  1][0].transcript.toLowerCase().trim();                                             
-      console.log("[STT]", transcript);
-                                                                                     
-      if (!awaitingCmd) {                                   
-        // waiting for wake word                                                     
-        if (transcript.includes(WAKE_PHRASE)) {             
-          awaitingCmd = true;                                                        
-          setStatus("cmd");
-          speak("Yes?", null); // non-blocking prompt                                
-        }                                                                            
-      } else {
-        // got command                                                               
-        awaitingCmd = false;                                
-        handleCommand(transcript);                                                   
+      // Desktop app                                                                 
+      if (isDesktopApp(target)) {                           
+        const msg = "I cannot open desktop apps from the browser, master. Try the 
+  local Python version for that.";                                                   
+        setAction(msg, true);
+        speak(msg, () => setStatus("wake"));                                         
+        return;                                                                      
       }
-    };                                                                               
-                                                            
-    r.onerror = (e) => {
-      if (e.error === "no-speech") return; // silent timeout, fine
-      console.warn("[STT error]", e.error);                                          
-      if (listening) {
-        setTimeout(() => { try { r.start(); } catch(_) {} }, 500);                   
-      }                                                     
-    };                                                                               
-                                                            
-    r.onend = () => {                                                                
-      if (listening) {
-        setTimeout(() => { try { r.start(); } catch(_) {} }, 200);                   
+                                                                                     
+      // Website — resolves anything                        
+      const url = resolveURL(target);
+      const displayName = target.charAt(0).toUpperCase() + target.slice(1);
+      const msg = "Yes master. Opening " + displayName + ".";                        
+      setAction(msg);
+      speak(msg, () => {                                                             
+        openURL(url, displayName);                          
+        setStatus("wake");                                                           
+      });                                                   
+      return;
+    }
+
+    // Search fallback — "search for X" or just unknown                              
+    const searchMatch = c.match(/^(?:search|search for|find|look 
+  up|google)\s+(.+)$/);                                                              
+    if (searchMatch) {                                      
+      const query = searchMatch[1].trim();                                           
+      const url = "https://www.google.com/search?q=" + encodeURIComponent(query);    
+      const msg = "Yes master. Searching for " + query + ".";
+      setAction(msg);                                                                
+      speak(msg, () => { openURL(url, query); setStatus("wake"); });
+      return;                                                                        
+    }
+                                                                                     
+    // Unknown                                              
+    const msg = "I didn't catch that, master. Please try again.";
+    setAction(msg, true);
+    speak(msg, () => setStatus("wake"));                                             
+  }
+                                                                                     
+  // ─────────────────────────────────────────────          
+  //  Speech recognition
+  // ─────────────────────────────────────────────
+  function buildRecognition() {                                                      
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {                                                                
+      document.getElementById("browser-warn").style.display = "block";
+      return null;                                                                   
+    }                                                       
+
+    const r = new SpeechRec();                                                       
+    r.continuous      = true;
+    r.interimResults  = false;                                                       
+    r.lang            = "en-US";                            
+    r.maxAlternatives = 1;                                                           
+   
+    r.onresult = (e) => {                                                            
+      if (isSpeaking) return; // ignore while Jarvis is talking
+      const transcript = Array.from(e.results)                                       
+        .slice(e.resultIndex)
+        .map(res => res[0].transcript)                                               
+        .join(" ")                                          
+        .toLowerCase()                                                               
+        .trim();                                            
+
+      console.log("[STT]", transcript);                                              
+   
+      if (!awaitingCmd) {                                                            
+        if (transcript.includes(WAKE_PHRASE)) {             
+          // Check if command follows inline: "Jarvis open youtube"
+          const parts = transcript.split(WAKE_PHRASE);                               
+          const inline = parts[parts.length - 1].trim();                             
+          if (inline.length > 3) {                                                   
+            awaitingCmd = false;                                                     
+            handleCommand(inline);                          
+          } else {                                                                   
+            awaitingCmd = true;                             
+            setStatus("cmd");
+            speak("Yes, master?", null);                                             
+          }
+        }                                                                            
+      } else {                                                                       
+        awaitingCmd = false;
+        handleCommand(transcript);                                                   
       }                                                     
     };
 
-    return r;
+    r.onerror = (e) => {
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      console.warn("[STT error]", e.error);                                          
+      if (e.error === "not-allowed") {
+        setAction("Microphone access denied. Please allow mic in browser settings.", 
+  true);                                                                             
+        setStatus("error");                                                          
+        listening = false;                                                           
+        return;                                             
+      }
+      if (listening && !isSpeaking) {
+        setTimeout(() => { try { r.start(); } catch(_) {} }, 600);                   
+      }
+    };                                                                               
+                                                            
+    r.onend = () => {
+      if (listening && !isSpeaking) {
+        setTimeout(() => { try { r.start(); } catch(_) {} }, 200);
+      }                                                                              
+    };
+                                                                                     
+    return r;                                               
   }
 
   function startListening() {
     if (!recognition) recognition = buildRecognition();
-    if (!recognition) return;                                                        
-    listening = true;
-    awaitingCmd = false;                                                             
-    try { recognition.start(); } catch(_) {}                
-    setStatus("wake");                                                               
-    micHint.textContent = "SAY "JARVIS" TO ACTIVATE";
-    speak("J.A.R.V.I.S. online. Awaiting your command.", null);                      
+    if (!recognition) return;
+    listening    = true;                                                             
+    awaitingCmd  = false;
+    try { recognition.start(); } catch(_) {}                                         
+    setStatus("wake");                                      
+    micHint.textContent = "SAY \"JARVIS\" TO ACTIVATE";                              
+    speak("J.A.R.V.I.S. online. Awaiting your command, master.", null);
   }                                                                                  
-  
+                                                            
   function stopListening() {                                                         
-    listening = false;                                      
-    awaitingCmd = false;                                                             
-    if (recognition) try { recognition.stop(); } catch(_) {}
+    listening   = false;                                    
+    awaitingCmd = false;
+    if (recognition) try { recognition.stop(); } catch(_) {}                         
     setStatus("idle");
-    waveform.classList.add("idle");
     micHint.textContent = "CLICK REACTOR TO ACTIVATE";                               
-  }
-                                                                                     
-  // ── Reactor click ──                                    
-  reactor.addEventListener("click", () => {
-    if (listening) {
+  }                                                         
+
+  // ─────────────────────────────────────────────                                   
+  //  Reactor click toggle
+  // ─────────────────────────────────────────────                                   
+  reactor.addEventListener("click", () => {                 
+    if (listening) {                                                                 
       stopListening();
       setAction("Jarvis deactivated.");                                              
-    } else {
-      startListening();                                                              
-    }                                                       
-  });
+    } else {                                                
+      startListening();
+    }
+  });                                                                                
   </script>
-  </body>
-  </html>
+  </body>                                                                            
+  </html>                                                   
+
+                                                   
+                                                   
